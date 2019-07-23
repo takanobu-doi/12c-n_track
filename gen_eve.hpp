@@ -11,11 +11,11 @@
 class gen_eve
 {
 public:
-  gen_eve(std::string, std::string, std::vector<std::string>, double);
+  gen_eve(std::string, std::string, std::vector<std::vector<std::string>>, std::vector<std::vector<double>>, double);
   ~gen_eve();
   void Generate();
   double GetBeamMass();
-  double GetParticleMass(int);
+  double GetParticleMass(int, int);
   TLorentzVector GetBeamVector();
   TLorentzVector GetParticleVector(int);
   unsigned int GetParticleNumber();
@@ -24,7 +24,7 @@ private:
   double P_beam;
   double mass_beam;
   double mass_target;
-  std::vector<double> mass;
+  std::vector<std::vector<double>> mass;
   TLorentzVector beam;
   TLorentzVector target;
   TLorentzVector W;

@@ -9,8 +9,8 @@
 #include <iostream>
 #include "database.hpp"
 
-gen_eve::gen_eve(std::string BEAM_NAME, std::string TARGET_NAME, std::vector<std::string> PARTICLE_NAME,
-		 double T_beam/*[MeV]*/)
+gen_eve::gen_eve(std::string BEAM_NAME, std::string TARGET_NAME, std::vector<std::vector<std::string>> PARTICLE_NAME,
+		 std::vector<std::vector<double>> PARTICLE_EX, double T_beam/*[MeV]*/)
 {
   // get paticle imformation
   database dataset;
@@ -52,26 +52,34 @@ gen_eve::gen_eve(std::string BEAM_NAME, std::string TARGET_NAME, std::vector<std
     }
   }
   mass_target = dataset.get_mass(A, particle_name.c_str())/1000.;
-  
-  for(auto it=PARTICLE_NAME.begin();it!=PARTICLE_NAME.end();++it){
-    particle_name = *it;
-    if(particle_name.size()>1){
-      A = stoi(particle_name);
-      particle_name.erase(particle_name.begin(), particle_name.begin()+int(log10(A))+1);
-    }else{
-      if(particle_name=="p"){
-	A = 1;
-      }else if(particle_name=="d"){
-	A = 2;
-      }else if(particle_name=="t"){
-	A = 3;
-      }else if(particle_name=="n"){
-	A = 1;
+
+  int ii = 0;
+  for(auto it1=PARTICLE_NAME.begin();it1!=PARTICLE_NAME.end();++it1){
+    std::vector<double> mass_temp;
+    int jj = 0;
+    for(auto it=(*it1).begin();it!=(*it1).end();++it){
+      particle_name = *it;
+      if(particle_name.size()>1){
+	A = stoi(particle_name);
+	particle_name.erase(particle_name.begin(), particle_name.begin()+int(log10(A))+1);
       }else{
-	A = 0;
+	if(particle_name=="p"){
+	  A = 1;
+	}else if(particle_name=="d"){
+	  A = 2;
+	}else if(particle_name=="t"){
+	  A = 3;
+	}else if(particle_name=="n"){
+	  A = 1;
+	}else{
+	  A = 0;
+	}
       }
+      mass_temp.push_back(dataset.get_mass(A, particle_name.c_str())/1000.+PARTICLE_EX[ii][jj]/1000.);
+      jj++;
     }
-    mass.push_back(dataset.get_mass(A, particle_name.c_str())/1000.);
+    mass.push_back(mass_temp);
+    ii++;
   }
   
   E_beam = T_beam/1000.+mass_beam; // total energy of incident particle [GeV]
@@ -99,15 +107,28 @@ void gen_eve::Generate()
 
   particles.clear();
 
-  event->SetDecay(W, mass.size(), mass.data());
+  event->SetDecay(W, mass[0].size(), mass[0].data());
   do{
     weight = event->Generate();
     uniform_rndm = rndm->Uniform(0., weight_max);
 //    uniform_rndm = rndm->Uniform(0., event->GetWtMax());
   }while(uniform_rndm > weight);
 
-  for(unsigned int ii=0;ii<mass.size();ii++){
+  for(unsigned int ii=0;ii<mass[0].size();ii++){
     particles.push_back(*event->GetDecay(ii));
+  }
+
+  for(unsigned int ii=1;ii<mass.size();ii++){
+    event->SetDecay(*(particles.end()-1), mass[ii].size(), mass[ii].data());
+    particles.pop_back();
+    do{
+      weight = event->Generate();
+      uniform_rndm = rndm->Uniform(0., weight_max);
+    }while(uniform_rndm > weight);
+
+    for(unsigned int jj=0;jj<mass[ii].size();jj++){
+      particles.push_back(*event->GetDecay(jj));
+    }
   }
 
   return;
@@ -118,9 +139,9 @@ double gen_eve::GetBeamMass()
   return mass_beam;
 }
 
-double gen_eve::GetParticleMass(int i)
+double gen_eve::GetParticleMass(int i, int j)
 {
-  return mass[i];
+  return mass[i][j];
 }
 
 TLorentzVector gen_eve::GetBeamVector()

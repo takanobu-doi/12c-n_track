@@ -32,7 +32,7 @@ public:
   int SetWaveFile();
   int SetRangeFile();
   void SetParameters(int, int);
-  std::vector<std::string> GetParticleName();
+  std::vector<std::vector<std::string>> GetParticleName();
   double GetFlush(int, int, int);
   int GetTOT(int, int, int);
   int DefineDetector();
@@ -61,7 +61,8 @@ private:
   // general parameters
   std::string beam_name;
   std::vector<std::string> target_name;
-  std::vector<std::vector<std::string>> particle_name;
+  std::vector<std::vector<std::vector<std::string>>> particle_name;
+  std::vector<std::vector<std::vector<double>>> particle_ex;
   std::vector<std::vector<bool>> particle_flag;
   std::string srim_name;
   std::string dirname;

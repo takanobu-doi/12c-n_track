@@ -18,15 +18,9 @@ int main(int argc, char *argv[]){
   int scatter;
   int pressure;
 
-  std::vector<std::string> reaction = {"4He(10C,10C)4He",
-				       "12C(10C,10C)12C",
-				       "16O(10C,10C)16O",
-				       "4He(10C,10C)3H+p",
-				       "4He(10C,10C)3He+n",
-				       "12C(10C,10C)11B+p",
-				       "12C(10C,10C)11C+n",
-				       "16O(10C,10C)15N+p",
-				       "16O(10C,10C)15C+n"};
+  std::vector<std::string> reaction = {"12C(n,n)12C",
+				       "12C(n,n)3a"
+  };
 
   if(check_cmd(argc, argv, reaction, event_num, fname, scatter, pressure) == 0){
     return 1;

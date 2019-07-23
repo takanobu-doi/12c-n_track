@@ -25,37 +25,23 @@ using namespace Garfield;
 void mktrack::SetParameters(int Event_id, int Pressure)
 {
   // general parameters
-  beam_name = "10C";
+  beam_name = "n";
   // define event-id
-  target_name = {"4He",
+  target_name = {"12C",
 		 "12C",
-		 "16O",
-		 "4He",
-		 "4He",
-		 "12C",
-		 "12C",
-		 "16O",
-		 "16O"
+		 "12C"
   };
-  particle_name = {{"10C", "4He"},
-		   {"10C", "12C"},
-		   {"10C", "16O"},
-		   {"10C", "t", "p"},
-		   {"10C", "3He", "n"},
-		   {"10C", "11B", "p"},
-		   {"10C", "11C", "n"},
-		   {"10C", "15N", "p"},
-		   {"10C", "15O", "n"}
+  particle_name = {{{"n", "12C"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}}
+  };
+  particle_ex = {{{0, 0}},
+		 {{0, 7.65}, {0., 0}, {0., 0.}},
+		 {{0, 9.64}, {0., 0}, {0., 0.}}
   };
   particle_flag = {{false, true}, // true for stoped particles
-		   {false, true},
-		   {false, true},
-		   {false, true, false},
-		   {false, true, false},
-		   {false, true, false},
-		   {false, true, false},
-		   {false, true, false},
-		   {false, true, false}
+		   {false, true, true, true},
+		   {false, true, true, true}
   };
   srim_name = "_HeCO2_96_4_";
   dirname = "table/";
@@ -129,7 +115,7 @@ mktrack::mktrack(int Event_id, int Pressure)
     std::cerr << "Cannot open srimfile" << std::endl;
     exit(0);
   }
-  event = new gen_eve(beam_name, *(target_name.begin()+event_id), *(particle_name.begin()+event_id), beam_energy);
+  event = new gen_eve(beam_name, *(target_name.begin()+event_id), *(particle_name.begin()+event_id), *(particle_ex.begin()+event_id), beam_energy);
   if(SetWaveFile()==0){
     std::cerr << "Cannot open wavefile" << std::endl;
     exit(0);
@@ -208,7 +194,7 @@ int mktrack::SetGasFile()
 int mktrack::SetSrimFile()
 {
   std::string srimfname;
-  srimfname = dirname+beam_name+"_HeCO2_96_4_"+std::to_string(pressure)+".srim";
+  srimfname = dirname+beam_name+srim_name+std::to_string(pressure)+".srim";
   
   srim_beam = new TrackSrim();
   if(sensor == nullptr){
@@ -230,29 +216,33 @@ int mktrack::SetSrimFile()
   srim_beam->DisableTransverseStraggling();
   srim_beam->DisableLongitudinalStraggling();
 
-  for(auto it=(*(particle_name.begin()+event_id)).begin();it!=(*(particle_name.begin()+event_id)).end();++it){
-    if(*it=="n"){
-      srim_particle.push_back(nullptr);
-      continue;
+  for(auto it1=(*(particle_name.begin()+event_id)).begin();it1!=(*(particle_name.begin()+event_id)).end();++it1){
+    if(it1==(*(particle_name.begin()+event_id)).begin()){
+      srim_particle.pop_back();
     }
-    srimfname = dirname+(*it)+"_HeCO2_96_4_"+std::to_string(pressure)+".srim";
-    srim_particle.push_back(new TrackSrim());
-    (*(srim_particle.end()-1))->SetSensor(sensor);
+    for(auto it=(*it1).begin();it!=(*it1).end();++it){
+      if(*it=="n"){
+	srim_particle.push_back(nullptr);
+	continue;
+      }
+      srimfname = dirname+(*it)+srim_name+std::to_string(pressure)+".srim";
+      srim_particle.push_back(new TrackSrim());
+      (*(srim_particle.end()-1))->SetSensor(sensor);
 //    std::cout << "Loading srimfile: " << srimfname << std::endl;
-    if((*(srim_particle.end()-1))->ReadFile(srimfname)==0){
-      return 0;
+      if((*(srim_particle.end()-1))->ReadFile(srimfname)==0){
+	return 0;
+      }
+      (*(srim_particle.end()-1))->SetWorkFunction(W_Val);
+      (*(srim_particle.end()-1))->SetFanoFactor(Fano_Factor);
+      (*(srim_particle.end()-1))->SetModel(4);
+      (*(srim_particle.end()-1))->SetAtomicMassNumbers(0.96*Mass_He+0.04*Mass_CO2,
+						       0.96*Charge_He+0.04*Charge_CO2);
+      (*(srim_particle.end()-1))->SetDensity(density);
+      (*(srim_particle.end()-1))->SetTargetClusterSize(Cluster_Size);
+      (*(srim_particle.end()-1))->DisableTransverseStraggling();
+      (*(srim_particle.end()-1))->DisableLongitudinalStraggling();
     }
-    (*(srim_particle.end()-1))->SetWorkFunction(W_Val);
-    (*(srim_particle.end()-1))->SetFanoFactor(Fano_Factor);
-    (*(srim_particle.end()-1))->SetModel(4);
-    (*(srim_particle.end()-1))->SetAtomicMassNumbers(0.96*Mass_He+0.04*Mass_CO2,
-						     0.96*Charge_He+0.04*Charge_CO2);
-    (*(srim_particle.end()-1))->SetDensity(density);
-    (*(srim_particle.end()-1))->SetTargetClusterSize(Cluster_Size);
-    (*(srim_particle.end()-1))->DisableTransverseStraggling();
-    (*(srim_particle.end()-1))->DisableLongitudinalStraggling();
   }
-
   return 1;
 }
 
@@ -288,33 +278,38 @@ int mktrack::SetWaveFile()
 int mktrack::SetRangeFile()
 {
   std::string rangefname;
-  for(auto it=(*(particle_name.begin()+event_id)).begin();it!=(*(particle_name.begin()+event_id)).end();++it){
-    if((*it)=="n"){
-      EnetoRange.push_back(nullptr);
-      continue;
+  for(auto it1=(*(particle_name.begin()+event_id)).begin();it1!=(*(particle_name.begin()+event_id)).end();++it1){
+    if(it1==(*(particle_name.begin()+event_id)).begin()){
+      EnetoRange.pop_back();
     }
-    rangefname = dirname+(*it)+"_"+std::to_string(pressure)+"_ene_to_range.dat";
+    for(auto it=(*it1).begin();it!=(*it1).end();++it){
+      if((*it)=="n"){
+	EnetoRange.push_back(nullptr);
+	continue;
+      }
+      rangefname = dirname+(*it)+"_"+std::to_string(pressure)+"_ene_to_range.dat";
 //    std::cout << "Loading rangefile: " << rangefname << std::endl;
-    std::ifstream ifile(rangefname);
-    if(ifile.fail()){
-      std::cerr << "There is not " << rangefname << std::endl;
-      return 0;
+      std::ifstream ifile(rangefname);
+      if(ifile.fail()){
+	std::cerr << "There is not " << rangefname << std::endl;
+	return 0;
+      }
+      std::vector<double> e;
+      std::vector<double> r;
+      std::string str;
+      std::stringstream stream;
+      double e_temp;
+      double r_temp;
+      while(getline(ifile, str)){
+	stream.clear();
+	stream << str;
+	stream >> e_temp >> r_temp;
+	e.push_back(e_temp);
+	r.push_back(r_temp);
+      }
+      EnetoRange_temp.push_back(new TGraph(e.size(), e.data(), r.data()));
+      EnetoRange.push_back(new TSpline5("EnetoRange", *(EnetoRange_temp.end()-1)));
     }
-    std::vector<double> e;
-    std::vector<double> r;
-    std::string str;
-    std::stringstream stream;
-    double e_temp;
-    double r_temp;
-    while(getline(ifile, str)){
-      stream.clear();
-      stream << str;
-      stream >> e_temp >> r_temp;
-      e.push_back(e_temp);
-      r.push_back(r_temp);
-    }
-    EnetoRange_temp.push_back(new TGraph(e.size(), e.data(), r.data()));
-    EnetoRange.push_back(new TSpline5("EnetoRange", *(EnetoRange_temp.end()-1)));
   }
   return 1;
 }
@@ -361,7 +356,7 @@ void mktrack::ShowSrim()
   return;
 }
 
-std::vector<std::string> mktrack::GetParticleName()
+std::vector<std::vector<std::string>> mktrack::GetParticleName()
 {
   return *(particle_name.begin()+event_id);
 }
