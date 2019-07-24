@@ -43,7 +43,7 @@ void mktrack::SetParameters(int Event_id, int Pressure)
 		   {false, true, true, true},
 		   {false, true, true, true}
   };
-  srim_name = "_HeCO2_96_4_";
+  srim_name = "_CH4_";
   dirname = "table/";
   event_id = Event_id;
   pressure = Pressure;
@@ -59,11 +59,9 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   // gas parameters
   W_Val = 10.0;
   Fano_Factor = 1.0;
-  Mass_CO2 = 44.;
-  Mass_He = 4.;
-  Charge_CO2 = 22.;
-  Charge_He = 2.;
-  density = (1.1647e-4)*pressure/500.;
+  Mass_GAS = 16.;
+  Charge_GAS = 10.;
+  density = (8.546e-5)*pressure/160.;
   Cluster_Size = 50; // default is 30
   Beam_Cluster_Size = 1;
   Particle_Cluster_Size = 100;
@@ -104,24 +102,24 @@ mktrack::mktrack(int Event_id, int Pressure)
   SetParameters(Event_id, Pressure);
 
   if(SetGasFile()==0){
-    std::cerr << "Cannot open gasfile" << std::endl;
+    std::cerr << "Cannot open gasfile" << "\e[?25h" << std::endl;
     exit(0);
   }
   if(DefineDetector()==0){
-    std::cerr << "Cannot define detector" << std::endl;
+    std::cerr << "Cannot define detector" << "\e[?25h" << std::endl;
     exit(0);
   }
   if(SetSrimFile()==0){
-    std::cerr << "Cannot open srimfile" << std::endl;
+    std::cerr << "Cannot open srimfile" << "\e[?25h" << std::endl;
     exit(0);
   }
   event = new gen_eve(beam_name, *(target_name.begin()+event_id), *(particle_name.begin()+event_id), *(particle_ex.begin()+event_id), beam_energy);
   if(SetWaveFile()==0){
-    std::cerr << "Cannot open wavefile" << std::endl;
+    std::cerr << "Cannot open wavefile" << "\e[?25h" << std::endl;
     exit(0);
   }
   if(SetRangeFile()==0){
-    std::cerr << "Cannot open rangefile" << std::endl;
+    std::cerr << "Cannot open rangefile" << "\e[?25h" << std::endl;
     exit(0);
   }
   
@@ -182,7 +180,7 @@ mktrack::~mktrack()
 
 int mktrack::SetGasFile()
 {
-  std::string magfname = dirname+"He-96_CO2-4_"+std::to_string(pressure)+".gas";
+  std::string magfname = dirname+"CH4_"+std::to_string(pressure)+".gas";
   gas = new MediumMagboltz();
   std::cout << "Loading gasfile: " << magfname << std::endl;
   if(gas->LoadGasFile(magfname)==0){
@@ -209,8 +207,7 @@ int mktrack::SetSrimFile()
   srim_beam->SetWorkFunction(W_Val);
   srim_beam->SetFanoFactor(Fano_Factor);
   srim_beam->SetModel(4);
-  srim_beam->SetAtomicMassNumbers(0.96*Mass_He+0.04*Mass_CO2,
-				  0.96*Charge_He+0.04*Charge_CO2);
+  srim_beam->SetAtomicMassNumbers(Mass_GAS, Charge_GAS);
   srim_beam->SetDensity(density);
   srim_beam->SetTargetClusterSize(Cluster_Size);
   srim_beam->DisableTransverseStraggling();
@@ -235,8 +232,7 @@ int mktrack::SetSrimFile()
       (*(srim_particle.end()-1))->SetWorkFunction(W_Val);
       (*(srim_particle.end()-1))->SetFanoFactor(Fano_Factor);
       (*(srim_particle.end()-1))->SetModel(4);
-      (*(srim_particle.end()-1))->SetAtomicMassNumbers(0.96*Mass_He+0.04*Mass_CO2,
-						       0.96*Charge_He+0.04*Charge_CO2);
+      (*(srim_particle.end()-1))->SetAtomicMassNumbers(Mass_GAS, Charge_GAS);
       (*(srim_particle.end()-1))->SetDensity(density);
       (*(srim_particle.end()-1))->SetTargetClusterSize(Cluster_Size);
       (*(srim_particle.end()-1))->DisableTransverseStraggling();

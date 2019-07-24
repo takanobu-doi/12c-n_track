@@ -80,10 +80,8 @@ private:
   // gas parameters
   double W_Val;
   double Fano_Factor;
-  double Mass_CO2;
-  double Mass_He;
-  double Charge_CO2;
-  double Charge_He;
+  double Mass_GAS;
+  double Charge_GAS;
   double density;
   int Cluster_Size;
   int Beam_Cluster_Size;

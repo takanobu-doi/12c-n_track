@@ -158,7 +158,7 @@ int check_cmd(int argc, char *argv[], std::vector<std::string> reaction, unsigne
     event_num = 1;
     fname = "temp";
     scatter = 0;
-    pressure = 500;
+    pressure = 160;
     int reaction_num=0;
     while(i<argc){
       std::string opt = argv[i++];
