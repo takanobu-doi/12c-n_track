@@ -27,22 +27,27 @@ class mktrack
 public:
   mktrack(int, int);
   ~mktrack();
+  void Initialize(int, int);
   int SetGasFile();
   int SetSrimFile();
   int SetWaveFile();
   int SetRangeFile();
+  int SetDriftFile();
   void SetParameters(int, int);
-  std::vector<std::vector<std::string>> GetParticleName();
+//  std::vector<std::string> GetParticleName();
+  int ModTrack();
   double GetFlush(int, int, int);
   int GetTOT(int, int, int);
   int DefineDetector();
-  int Generate(int&);
+  int Generate(int&, double&);
   int GenTrack(TrackSrim*, TLorentzVector, double[3], double[3][2], int);
   void ClearBuffer();
   void AddRawWave(double [], double, int);
   void ShowSrim();
   int ShowIdealValues(std::ostream&, int);
   int ShowTeacherValues(std::ostream&, int);
+  void ElectronDrift(double, double, double, double, double&, double&, double&, double&);
+  double GetDriftv();
 private:
   MediumMagboltz *gas = nullptr;
   GeometrySimple *geo = nullptr;
@@ -51,7 +56,7 @@ private:
   Sensor *sensor = nullptr;
   AvalancheMC *drift = nullptr;
   TrackSrim *srim_beam = nullptr;
-  std::vector<TrackSrim *> srim_particle;
+  std::vector<TrackSrim*> srim_particle;
   gen_eve *event = nullptr;
   TGraph *wave_temp = nullptr;
   TSpline5 *wave = nullptr;
@@ -69,6 +74,8 @@ private:
   int event_id;
   int pressure;
   double beam_energy;
+  double Ex_min;
+  double Ex_max;
   double VTX_X_MEAN;
   double VTX_X_SIGMA;
   double VTX_Y_MEAN;
@@ -80,8 +87,8 @@ private:
   // gas parameters
   double W_Val;
   double Fano_Factor;
-  double Mass_GAS;
-  double Charge_GAS;
+  double Mass_Gas;
+  double Charge_Gas;
   double density;
   int Cluster_Size;
   int Beam_Cluster_Size;
@@ -109,8 +116,16 @@ private:
   double mmTocm;
   double threshold;
 
-  std::vector<std::vector<std::vector<int>>> point;
+  std::vector<std::vector<std::vector<double>>> point;
   std::vector<double> range;
+
+  //*** dirft paraeters ***//
+  double driftv;
+  double diff_long;
+  double diff_tra;
+
+  // triger modify
+  int buff;
 };
 
 #endif

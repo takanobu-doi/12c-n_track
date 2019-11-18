@@ -28,29 +28,27 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   beam_name = "n";
   // define event-id
   target_name = {"12C",
-		 "12C",
 		 "12C"
   };
   particle_name = {{{"n", "12C"}},
-		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
-		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}}
+		   {{"n", "12C"}, {"4He", "4He", "4He"}}
   };
   particle_ex = {{{0, 0}},
-		 {{0, 7.65}, {0., 0}, {0., 0.}},
-		 {{0, 9.64}, {0., 0}, {0., 0.}}
+		 {{0, 7.65}, {0, 0, 0}}
   };
-  particle_flag = {{false, true}, // true for stoped particles
-		   {false, true, true, true},
+  particle_flag = {{false, false}, // true for stoped particles
 		   {false, true, true, true}
   };
   srim_name = "_CH4_";
   dirname = "table/";
   event_id = Event_id;
   pressure = Pressure;
-  beam_energy = 750; // [MeV]
+  beam_energy = 14; // [MeV]
+  Ex_min = 0.; // [MeV]
+  Ex_max = 20.; // [MeV]
   VTX_X_MEAN = 102.4/2.;
   VTX_X_SIGMA = 0.1;
-  VTX_Y_MEAN = 55.;
+  VTX_Y_MEAN = 140./2.;
   VTX_Y_SIGMA = 0.1;
   VTX_Y_START = 140.*1/8.;
   VTX_Y_STOP = 140.*7/8;
@@ -59,12 +57,12 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   // gas parameters
   W_Val = 10.0;
   Fano_Factor = 1.0;
-  Mass_GAS = 16.;
-  Charge_GAS = 10.;
-  density = (8.546e-5)*pressure/160.;
-  Cluster_Size = 50; // default is 30
+  Mass_Gas = 16.;
+  Charge_Gas = 10.;
+  density = 0.00065819*pressure/1000.;
+  Cluster_Size = 1; // default is 30
   Beam_Cluster_Size = 1;
-  Particle_Cluster_Size = 100;
+  Particle_Cluster_Size = 20;
   // detector parameters
   center[0] = 10.24/2;
   center[1] = 14./2;
@@ -73,9 +71,9 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   half[1] = 14./2;
   half[2] = 14./2;
   y_plate = 14.;
-  v_plate = -4300.;
+  v_plate = -1320.;
   y_grid = 0.;
-  v_grid = -820.;
+  v_grid = -1250.;
   E_FIELD = (v_grid-v_plate)/(y_plate-y_grid);
   area[0][0] = 0.;
   area[1][0] = 0.;
@@ -88,54 +86,21 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   beam_area[0][1] = 102.4;
   beam_area[1][1] = 140.;
   beam_area[2][1] = 150.;
-  gain = 1000.; // default is 1000.
-  ie_step = 50; // default is 100
+  gain = 300.; // default is 1000.
+  ie_step = 1; // default is 100
 
   cmTomm = 10.;
   mmTocm = 0.1;
-  threshold = 1.0; // default is 1.0
+  threshold = 1.; // default is 1.0
+
+  buff = 30;
   return;
 }
 
 mktrack::mktrack(int Event_id, int Pressure)
 {
   SetParameters(Event_id, Pressure);
-
-  if(SetGasFile()==0){
-    std::cerr << "Cannot open gasfile" << "\e[?25h" << std::endl;
-    exit(0);
-  }
-  if(DefineDetector()==0){
-    std::cerr << "Cannot define detector" << "\e[?25h" << std::endl;
-    exit(0);
-  }
-  if(SetSrimFile()==0){
-    std::cerr << "Cannot open srimfile" << "\e[?25h" << std::endl;
-    exit(0);
-  }
-  event = new gen_eve(beam_name, *(target_name.begin()+event_id), *(particle_name.begin()+event_id), *(particle_ex.begin()+event_id), beam_energy);
-  if(SetWaveFile()==0){
-    std::cerr << "Cannot open wavefile" << "\e[?25h" << std::endl;
-    exit(0);
-  }
-  if(SetRangeFile()==0){
-    std::cerr << "Cannot open rangefile" << "\e[?25h" << std::endl;
-    exit(0);
-  }
-  
-  std::random_device seed_gen;
-  
-  rndm = new TRandom3();
-  rndm->SetSeed(seed_gen());
-
-  std::vector<double> ch(256);
-  std::vector<std::vector<double>> clk;
-  for(int ii=0;ii<1024;ii++){
-    clk.push_back(ch);
-  }
-  for(int ii=0;ii<2;ii++){
-    flush.push_back(clk);
-  }
+  Initialize(Event_id, Pressure);
 }
 
 mktrack::~mktrack()
@@ -178,6 +143,48 @@ mktrack::~mktrack()
   }
 }
 
+void mktrack::Initialize(int Event_id, int Pressure){
+  if(SetGasFile()==0){
+    std::cerr << "Cannot open gasfile" << std::endl;
+    exit(0);
+  }
+  if(DefineDetector()==0){
+    std::cerr << "Cannot define detector" << std::endl;
+    exit(0);
+  }
+  if(SetSrimFile()==0){
+    std::cerr << "Cannot open srimfile" << std::endl;
+    exit(0);
+  }
+  event = new gen_eve(beam_name, *(target_name.begin()+event_id), *(particle_name.begin()+event_id), beam_energy, *(particle_ex.begin()+event_id));
+  if(SetWaveFile()==0){
+    std::cerr << "Cannot open wavefile" << std::endl;
+    exit(0);
+  }
+  if(SetRangeFile()==0){
+    std::cerr << "Cannot open rangefile" << std::endl;
+    exit(0);
+  }
+  if(SetDriftFile()==0){
+    std::cerr << "Cannot set driftfile" << std::endl;
+    exit(0);
+  }
+  
+  std::random_device seed_gen;
+  
+  rndm = new TRandom3();
+  rndm->SetSeed(seed_gen());
+
+  std::vector<double> ch(256);
+  std::vector<std::vector<double>> clk;
+  for(int ii=0;ii<1024;++ii){
+    clk.push_back(ch);
+  }
+  for(int ii=0;ii<2;++ii){
+    flush.push_back(clk);
+  }
+}
+
 int mktrack::SetGasFile()
 {
   std::string magfname = dirname+"CH4_"+std::to_string(pressure)+".gas";
@@ -192,37 +199,42 @@ int mktrack::SetGasFile()
 int mktrack::SetSrimFile()
 {
   std::string srimfname;
-  srimfname = dirname+beam_name+srim_name+std::to_string(pressure)+".srim";
+  if(beam_name=="n"){
+    srim_beam = nullptr;
+  }else{
+    srimfname = dirname+beam_name+srim_name+std::to_string(pressure)+".srim";
   
-  srim_beam = new TrackSrim();
-  if(sensor == nullptr){
-    std::cerr << "Sensor is not defined yet." << std::endl;
-    return 0;
-  }
-  srim_beam->SetSensor(sensor);
-//  std::cout << "Loading srimfile: " << srimfname << std::endl;
-  if(srim_beam->ReadFile(srimfname)==0){
-    return 0;
-  }
-  srim_beam->SetWorkFunction(W_Val);
-  srim_beam->SetFanoFactor(Fano_Factor);
-  srim_beam->SetModel(4);
-  srim_beam->SetAtomicMassNumbers(Mass_GAS, Charge_GAS);
-  srim_beam->SetDensity(density);
-  srim_beam->SetTargetClusterSize(Cluster_Size);
-  srim_beam->DisableTransverseStraggling();
-  srim_beam->DisableLongitudinalStraggling();
-
-  for(auto it1=(*(particle_name.begin()+event_id)).begin();it1!=(*(particle_name.begin()+event_id)).end();++it1){
-    if(it1==(*(particle_name.begin()+event_id)).begin()){
-      srim_particle.pop_back();
+    srim_beam = new TrackSrim();
+    if(sensor == nullptr){
+      std::cerr << "Sensor is not defined yet." << std::endl;
+      return 0;
     }
+    srim_beam->SetSensor(sensor);
+//  std::cout << "Loading srimfile: " << srimfname << std::endl;
+    if(srim_beam->ReadFile(srimfname)==0){
+      return 0;
+    }
+    srim_beam->SetWorkFunction(W_Val);
+    srim_beam->SetFanoFactor(Fano_Factor);
+    srim_beam->SetModel(4);
+    srim_beam->SetAtomicMassNumbers(Mass_Gas,
+				    Charge_Gas);
+    srim_beam->SetDensity(density);
+    srim_beam->SetTargetClusterSize(Cluster_Size);
+    srim_beam->DisableTransverseStraggling();
+    srim_beam->DisableLongitudinalStraggling();
+  }
+  
+  for(auto it1=(*(particle_name.begin()+event_id)).begin();it1!=(*(particle_name.begin()+event_id)).end();++it1){
     for(auto it=(*it1).begin();it!=(*it1).end();++it){
+      if(it==(*it1).begin()&&srim_particle.size()){
+	srim_particle.pop_back();
+      }
       if(*it=="n"){
 	srim_particle.push_back(nullptr);
 	continue;
       }
-      srimfname = dirname+(*it)+srim_name+std::to_string(pressure)+".srim";
+      srimfname = dirname+(*it)+"_CH4_"+std::to_string(pressure)+".srim";
       srim_particle.push_back(new TrackSrim());
       (*(srim_particle.end()-1))->SetSensor(sensor);
 //    std::cout << "Loading srimfile: " << srimfname << std::endl;
@@ -232,13 +244,15 @@ int mktrack::SetSrimFile()
       (*(srim_particle.end()-1))->SetWorkFunction(W_Val);
       (*(srim_particle.end()-1))->SetFanoFactor(Fano_Factor);
       (*(srim_particle.end()-1))->SetModel(4);
-      (*(srim_particle.end()-1))->SetAtomicMassNumbers(Mass_GAS, Charge_GAS);
+      (*(srim_particle.end()-1))->SetAtomicMassNumbers(Mass_Gas,
+						       Charge_Gas);
       (*(srim_particle.end()-1))->SetDensity(density);
       (*(srim_particle.end()-1))->SetTargetClusterSize(Cluster_Size);
       (*(srim_particle.end()-1))->DisableTransverseStraggling();
       (*(srim_particle.end()-1))->DisableLongitudinalStraggling();
     }
   }
+
   return 1;
 }
 
@@ -275,16 +289,16 @@ int mktrack::SetRangeFile()
 {
   std::string rangefname;
   for(auto it1=(*(particle_name.begin()+event_id)).begin();it1!=(*(particle_name.begin()+event_id)).end();++it1){
-    if(it1==(*(particle_name.begin()+event_id)).begin()){
-      EnetoRange.pop_back();
-    }
     for(auto it=(*it1).begin();it!=(*it1).end();++it){
+      if(it==(*it1).begin()&&EnetoRange_temp.size()&&EnetoRange.size()){
+	EnetoRange_temp.pop_back();
+	EnetoRange.pop_back();
+      }
       if((*it)=="n"){
 	EnetoRange.push_back(nullptr);
 	continue;
       }
       rangefname = dirname+(*it)+"_"+std::to_string(pressure)+"_ene_to_range.dat";
-//    std::cout << "Loading rangefile: " << rangefname << std::endl;
       std::ifstream ifile(rangefname);
       if(ifile.fail()){
 	std::cerr << "There is not " << rangefname << std::endl;
@@ -293,11 +307,10 @@ int mktrack::SetRangeFile()
       std::vector<double> e;
       std::vector<double> r;
       std::string str;
-      std::stringstream stream;
       double e_temp;
       double r_temp;
       while(getline(ifile, str)){
-	stream.clear();
+	std::stringstream stream;
 	stream << str;
 	stream >> e_temp >> r_temp;
 	e.push_back(e_temp);
@@ -307,6 +320,47 @@ int mktrack::SetRangeFile()
       EnetoRange.push_back(new TSpline5("EnetoRange", *(EnetoRange_temp.end()-1)));
     }
   }
+  return 1;
+}
+
+int mktrack::SetDriftFile()
+{
+  std::vector<double> efields, bfields, angles;
+  gas->GetFieldGrid(efields, bfields, angles);
+  double velocity[efields.size()];
+  double diff_t[efields.size()];
+  double diff_l[efields.size()];
+  double town_a[efields.size()];
+  double attach[efields.size()];
+
+  unsigned int i=0;
+  for(i=0;i<efields.size();++i){
+    gas->GetElectronVelocityE(i, 0, 0, velocity[i]); // cm/ns
+    gas->GetElectronTransverseDiffusion(i, 0, 0, diff_t[i]); // sqrt(cm)
+    gas->GetElectronLongitudinalDiffusion(i, 0, 0, diff_l[i]); // sqrt(cm)
+    gas->GetElectronTownsend(i, 0, 0, town_a[i]);
+    gas->GetElectronAttachment(i, 0, 0, attach[i]);
+
+    if(town_a[i]<0){
+      town_a[i] = 0;
+    }
+    if(attach[i]<0){
+      attach[i] = 0;
+    }
+  }
+
+  if(i==0){
+    return 0;
+  }
+
+  TGraph gr_driftv(efields.size(), efields.data(), velocity);
+  TGraph gr_diff_tra(efields.size(), efields.data(), diff_t);
+  TGraph gr_diff_long(efields.size(), efields.data(), diff_l);
+
+  driftv = gr_driftv.Eval(E_FIELD);
+  diff_tra = gr_diff_tra.Eval(E_FIELD);
+  diff_long = gr_diff_long.Eval(E_FIELD);
+
   return 1;
 }
 
@@ -352,21 +406,21 @@ void mktrack::ShowSrim()
   return;
 }
 
-std::vector<std::vector<std::string>> mktrack::GetParticleName()
-{
-  return *(particle_name.begin()+event_id);
-}
+//std::vector<std::string> mktrack::GetParticleName()
+//{
+//  return *(particle_name.begin()+event_id);
+//}
 
-int mktrack::Generate(int &status)
+int mktrack::Generate(int &status, double &ex)
 {
   ClearBuffer();
 
   status = 1;
-  event->Generate();
+  ex = event->Generate();
 
   vtx[0] = rndm->Gaus(VTX_X_MEAN, VTX_X_SIGMA);
 //  vtx[1] = rndm->Gaus(VTX_Y_MEAN, VTX_Y_SIGMA);
-  vtx[1] = rndm->Uniform(VTX_Y_START, VTX_Z_STOP);
+  vtx[1] = rndm->Uniform(VTX_Y_START, VTX_Y_STOP);
   vtx[2] = rndm->Uniform(VTX_Z_START, VTX_Z_STOP);
   start_point[0] = vtx[0];
   start_point[1] = vtx[1];
@@ -378,7 +432,8 @@ int mktrack::Generate(int &status)
 //  }
 
   // judge if particle is stopped inside
-  for(unsigned int i_particle=1;i_particle<event->GetParticleNumber();i_particle++){
+  unsigned int N_particle = event->GetParticleNumber();
+  for(unsigned int i_particle=1;i_particle<N_particle;++i_particle){
     if(EnetoRange[i_particle]==nullptr){
       continue;
     }
@@ -391,21 +446,26 @@ int mktrack::Generate(int &status)
 		    event->GetParticleVector(i_particle).Py()/dr,
 		    event->GetParticleVector(i_particle).Pz()/dr};
 
-    if(particle_flag[event_id][i_particle] && (r*dx[0]+vtx[0]<area[0][0] || r*dx[0]+vtx[0]>area[0][1] ||
-					       r*dx[1]+vtx[1]<area[1][0] || r*dx[1]+vtx[1]>area[1][1] ||
-					       r*dx[2]+vtx[2]<area[2][0] || r*dx[2]+vtx[2]>area[2][1])){
+    if(particle_flag[event_id][i_particle] &&
+       ((r*dx[0]+vtx[0]<area[0][0] || r*dx[0]+vtx[0]>area[0][1] ||
+	 r*dx[1]+vtx[1]<area[1][0] || r*dx[1]+vtx[1]>area[1][1] ||
+	 r*dx[2]+vtx[2]<area[2][0] || r*dx[2]+vtx[2]>area[2][1])||
+	r<20)
+       ){
       return 0;
     }
   }
 
   status = 2;
   // beam track
-  GenTrack(srim_beam, event->GetBeamVector(), start_point, beam_area, -1);
+  if(srim_beam!=nullptr){
+    GenTrack(srim_beam, event->GetBeamVector(), start_point, beam_area, -1);
+  }
   point.clear();
   range.clear();
 
   // other particles track
-  for(unsigned int i_particle=0;i_particle<event->GetParticleNumber();i_particle++){
+  for(unsigned int i_particle=0;i_particle<N_particle;++i_particle){
     if(srim_particle[i_particle]==nullptr){
       continue;
     }
@@ -424,7 +484,18 @@ int mktrack::Generate(int &status)
 //  if(point.size()!=event->GetParticleNumber()-1 || range.size()!=event->GetParticleNumber()-1){
 //    return 0;
 //  }
-  
+
+//  // modify triger timing
+//  int shifted = ModTrack();
+//
+//  // modify labeled point "y-shifted"
+//  for(unsigned int i=0;i<point.size();i++){
+//    point[i][0][1] = point[i][0][1]-shifted;
+//    point[i][1][1] = point[i][1][1]-shifted;
+//    point[i][2][1] = point[i][2][1]-shifted;
+//    point[i][3][1] = point[i][3][1]-shifted;
+//  }
+
   return 1;
 }
 
@@ -434,7 +505,7 @@ int mktrack::GenTrack(TrackSrim *srim, TLorentzVector particle_vec, double VTX[3
 
   double t_0 = 0.;
 
-  std::vector<std::vector<int>> temp_point;
+  std::vector<std::vector<double>> temp_point;
   
   if(!srim->NewTrack(VTX[0]*mmTocm, VTX[1]*mmTocm, VTX[2]*mmTocm, t_0,
 		     particle_vec.Px(), particle_vec.Py(), particle_vec.Pz())){
@@ -450,7 +521,7 @@ int mktrack::GenTrack(TrackSrim *srim, TLorentzVector particle_vec, double VTX[3
   double ekin;
   int first_flag = 1;
   double drift_time = 0;
-  std::vector<int> sca_a, sca_c, end_a, end_c;
+  std::vector<double> sca_a, sca_c, end_a, end_c;
   
   while(srim->GetCluster(cluster_pos[1], cluster_pos[2], cluster_pos[3], cluster_pos[0],
 			 ne, ec, ekin)){
@@ -459,12 +530,10 @@ int mktrack::GenTrack(TrackSrim *srim, TLorentzVector particle_vec, double VTX[3
        cluster_pos[3]<sensed_area[2][0]*mmTocm || cluster_pos[3]>sensed_area[2][1]*mmTocm){
       return 0;
     }
-
     n_cluster++;
     tot_ne+=ne;
-
     
-    int drift_status;
+//    int drift_status;
     int add_ele;
     int ie = 0;
 
@@ -476,38 +545,30 @@ int mktrack::GenTrack(TrackSrim *srim, TLorentzVector particle_vec, double VTX[3
 	add_ele = ie_step;
       }
       
-      if(drift->AvalancheElectron(cluster_pos[1], cluster_pos[2], cluster_pos[3], cluster_pos[0])){
-	int ne_sub = drift->GetNumberOfElectronEndpoints();
-	for(int ie_sub=0;ie_sub<ne_sub;ie_sub++){
-	  drift->GetElectronEndpoint(ie_sub,
-				     cluster_pos[1], cluster_pos[2], cluster_pos[3], cluster_pos[0],
-				     ele_end_pos[1], ele_end_pos[2], ele_end_pos[3], ele_end_pos[0],
-				     drift_status);
-	  if(ele_end_pos[2]<0 && drift_status==-5){
+//      if(drift->AvalancheElectron(cluster_pos[1], cluster_pos[2], cluster_pos[3], cluster_pos[0])){
+//	int ne_sub = drift->GetNumberOfElectronEndpoints();
+      int ne_sub = 1;
+	for(int ie_sub=0;ie_sub<ne_sub;++ie_sub){
+//	  drift->GetElectronEndpoint(ie_sub,
+//				     cluster_pos[1], cluster_pos[2], cluster_pos[3], cluster_pos[0],
+//				     ele_end_pos[1], ele_end_pos[2], ele_end_pos[3], ele_end_pos[0],
+//				     drift_status);
+	  ElectronDrift(cluster_pos[1], cluster_pos[2], cluster_pos[3], cluster_pos[0],
+			ele_end_pos[1], ele_end_pos[2], ele_end_pos[3], ele_end_pos[0]);
+//	  if(ele_end_pos[2]<0 && drift_status==-5){
 	    drift_time = (ele_end_pos[0]-cluster_pos[0]);
 	    AddRawWave(ele_end_pos, drift_time, add_ele);
 	    if(first_flag){
-	      sca_a = std::vector<int>{(int)(cluster_pos[3]*cmTomm/0.4), (int)(drift_time/10.)};
-	      sca_c = std::vector<int>{(int)(cluster_pos[1]*cmTomm/0.4), (int)(drift_time/10.)};
+	      sca_a = std::vector<double>{(cluster_pos[3]*cmTomm/0.4), (drift_time/10.)};
+	      sca_c = std::vector<double>{(cluster_pos[1]*cmTomm/0.4), (drift_time/10.)};
 	      first_flag = 0;
 	    } // end of if(first...
-	    end_a = std::vector<int>{(int)(cluster_pos[3]*cmTomm/0.4), (int)(drift_time/10.)};
-	    end_c = std::vector<int>{(int)(cluster_pos[1]*cmTomm/0.4), (int)(drift_time/10.)};
-	  } // end of if(ele_e...
+	    end_a = std::vector<double>{(cluster_pos[3]*cmTomm/0.4), (drift_time/10.)};
+	    end_c = std::vector<double>{(cluster_pos[1]*cmTomm/0.4), (drift_time/10.)};
+//	  } // end of if(ele_e...
 	} // end of for(int ie_sub...
-      } // end of if(drift->Ava...
+//      } // end of if(drift->Ava...
 
-//      if(drift->DriftElectron(cluster_pos[1], cluster_pos[2], cluster_pos[3], cluster_pos[0])){
-//	for(int i_drift=0;i_drift<drift->GetNumberOfDriftLinePoints();i_drift++){
-//	  drift->GetDriftLinePoint(i_drift, ele_end_pos[1], ele_end_pos[2], ele_end_pos[3], ele_end_pos[0]);
-//	  if(ele_end_pos[2]<1.e-7){
-//	    drift_time = ele_end_pos[0]-cluster_pos[0];
-//	    AddRawWave(ele_end_pos, drift_time, add_ele);
-//          break;
-//	  } // end of if(ele_end...
-//	} // end of for(int i_dri...
-//      } // end of if(drift->Dri...
-      
       ie+=add_ele;
     } // end of while(ne...
 
@@ -531,6 +592,48 @@ int mktrack::GenTrack(TrackSrim *srim, TLorentzVector particle_vec, double VTX[3
   return 1;
 }
 
+int mktrack::ModTrack()
+{
+  int triger = 0;
+  for(int jj=0;jj<1024;++jj){
+    for(int kk=0;kk<256;++kk){
+      if(flush[0][jj][kk]>threshold){
+	triger = jj;
+	break;
+      }
+    }
+    if(triger!=0){
+      break;
+    }
+  }
+
+  if(triger>buff){
+    for(int ii=0;ii<2;ii++){
+      for(int kk=0;kk<256;kk++){
+	for(int jj=0;jj<1024-triger+buff;jj++){
+	  flush[ii][jj][kk] = flush[ii][jj+triger-buff][kk];
+	}
+	for(int jj=1024-triger+buff;jj<1024;jj++){
+	  flush[ii][jj][kk] = 0;
+	}
+      }
+    }
+  }else{
+    for(int ii=0;ii<2;ii++){
+      for(int kk=0;kk<256;kk++){
+	for(int jj=1023;jj>=buff-triger;jj--){
+	  flush[ii][jj][kk] = flush[ii][jj-buff+triger][kk];
+	}
+	for(int jj=buff-triger-1;jj>=0;jj--){
+	  flush[ii][jj][kk] = 0;
+	}
+      }
+    }
+  }
+
+  return triger-buff;
+}
+
 double mktrack::GetFlush(int ii, int jj, int kk)
 {
   return flush[ii][jj][kk];
@@ -547,9 +650,9 @@ int mktrack::GetTOT(int ii, int jj, int kk)
 
 void mktrack::ClearBuffer()
 {
-  for(int ii=0;ii<2;ii++){
-    for(int jj=0;jj<1024;jj++){
-      for(int kk=0;kk<256;kk++){
+  for(int ii=0;ii<2;++ii){
+    for(int jj=0;jj<1024;++jj){
+      for(int kk=0;kk<256;++kk){
 	flush[ii][jj][kk] = 0;
       }
     }
@@ -575,11 +678,11 @@ void mktrack::AddRawWave(double ele_end_pos[], double drift_time, int ne)
   min_height = wave->Eval(0)*ne*gain;
   temp_height = wave->Eval(-drift_time)*ne*gain;
 //  temp_height = 0;
-  for(int ac=0;ac<2;ac++){
+  for(int ac=0;ac<2;++ac){
     break_flag = 0;
     max_flag = 0;
     if(strp[ac]>=0 && strp[ac]<256){
-      for(int clk=0;clk<1024;clk++){
+      for(int clk=0;clk<1024;++clk){
 	ns = clk*10.0;
 	pulse_height = wave->Eval(ns-drift_time)*ne*gain;
 	
@@ -608,12 +711,12 @@ int mktrack::ShowIdealValues(std::ostream& os, int exist)
 {
   if(exist==0){
     os << "# ";
-    for(unsigned int i=0;i<event->GetParticleNumber();i++){
+    for(unsigned int i=0;i!=event->GetParticleNumber();++i){
       os << "e" << i+2 << "[MeV] m" << i+2 << "[MeV] phi" << i+2 << "[rad] theta" << i+2 << "[rad] ";
     }
     os << std::endl;
   }
-  for(unsigned int i=0;i<event->GetParticleNumber();i++){
+  for(unsigned int i=0;i<event->GetParticleNumber();++i){
     os << event->GetParticleVector(i).E()*1000 << " "
        << event->GetParticleVector(i).M()*1000 << " "
        << event->GetParticleVector(i).Phi() << " "
@@ -633,17 +736,17 @@ int mktrack::ShowTeacherValues(std::ostream& os, int exist)
 //      os << "sca_a_x sca_a_y sca_c_x sca_c_y end_a_x end_a_y end_c_x end_c_y [pixel]";
 //    }
 //    os << std::endl;
-    for(unsigned int i=0;i<range.size();i++){
+    for(unsigned int i=0;i<range.size();++i){
       os << "range" << i+3 << "[mm] phi" << i+3 << "[rad] theta" << i+3 << "[rad] ";
       os << "sca_a_x sca_a_y sca_c_x sca_c_y end_a_x end_a_y end_c_x end_c_y [pixel]";
     }
     os << std::endl;
   }
 //  for(unsigned int i=0;i<event->GetParticleNumber()-1;i++){
-  for(unsigned int i=0;i<range.size();i++){
+  for(unsigned int i=0;i<range.size();++i){
     os << range[i] << " " << std::flush;
-    os << event->GetParticleVector(i).Phi() << " " << std::flush;
-    os << event->GetParticleVector(i).Theta() << " " << std::flush;
+    os << event->GetParticleVector(i+1).Phi() << " " << std::flush;
+    os << event->GetParticleVector(i+1).Theta() << " " << std::flush;
     os << point[i][0][0] << " " << std::flush;
     os << point[i][0][1] << " " << std::flush;
     os << point[i][1][0] << " " << std::flush;
@@ -656,4 +759,29 @@ int mktrack::ShowTeacherValues(std::ostream& os, int exist)
   os << std::endl;
   
   return 1;
+}
+
+void mktrack::ElectronDrift(double cluster_pos1, double cluster_pos2, double cluster_pos3, double cluster_pos0,
+			double &ele_end_pos1, double &ele_end_pos2, double &ele_end_pos3, double &ele_end_pos0)
+{
+  double drift_len = cluster_pos2-0;
+//  double sigma_tra = diff_tra*sqrt(drift_len);
+//  double sigma_long = diff_long*sqrt(drift_len);
+  double sigma_tra = 0.08; // [cm]
+  double sigma_long = 0.08; // [cm]
+
+  ele_end_pos0 = (drift_len+rndm->Gaus(0, sigma_long))/(driftv); // ns
+  if(ele_end_pos0<0){
+    ele_end_pos0 = 0;
+  }
+  ele_end_pos1 = cluster_pos1+rndm->Gaus(0, sigma_tra); // cm
+  ele_end_pos2 = 0;
+  ele_end_pos3 = cluster_pos3+rndm->Gaus(0, sigma_tra); // cm
+  
+  return;
+}
+
+double mktrack::GetDriftv()
+{
+  return driftv;
 }

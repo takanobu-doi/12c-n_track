@@ -6,7 +6,7 @@ ROOTLIBS = $(shell root-config --libs)
 GARFIELDFLAGS = -I${GARFIELD_HOME}/Include
 GARFIELDLIBS = ${GARFIELD_HOME}/Library/libGarfield.a
 
-CFLAGS = -O4 -Wall ${ROOTFLAGS} ${GARFIELDFLAGS}
+CFLAGS = -O2 -Wall ${ROOTFLAGS} ${GARFIELDFLAGS}
 LIBS = ${GARFIELDLIBS} -lgfortran ${ROOTLIBS}
 DEBAG = -g
 
