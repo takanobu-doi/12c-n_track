@@ -18,15 +18,9 @@ int main(int argc, char *argv[]){
   int scatter;
   int pressure;
 
-  std::vector<std::string> reaction = {"4He(10C,10C)4He",
-				       "12C(10C,10C)12C",
-				       "16O(10C,10C)16O",
-				       "4He(10C,10C)3H+p",
-				       "4He(10C,10C)3He+n",
-				       "12C(10C,10C)11B+p",
-				       "12C(10C,10C)11C+n",
-				       "16O(10C,10C)15N+p",
-				       "16O(10C,10C)15C+n"};
+  std::vector<std::string> reaction = {"12C(n,n)12C",
+				       "12C(n,n)3a",
+				       "p(n,n)p"};
 
   if(check_cmd(argc, argv, reaction, event_num, fname, scatter, pressure) == 0){
     return 1;
@@ -79,26 +73,26 @@ int main(int argc, char *argv[]){
 //	std::string fname_2 = "temp_tot_"+std::to_string(ii++)+".dat";
 //	std::ofstream tot_out_2(datdir+fname_2);
 	mtx.lock();
-	mktrack MAIKo(scatter, pressure);
-	drift_v = MAIKo.GetDriftv();
+	mktrack *MAIKo = new mktrack(scatter, pressure);
+	drift_v = MAIKo->GetDriftv();
 	mtx.unlock();
 	for(int num=0;num<tot_num;){
 	  // generate event & get picutres
-	  while(MAIKo.Generate(status, Ex)==0){}
+	  while(MAIKo->Generate(status, Ex)==0){}
 	  
 	  mtx.lock();
 	  status = 3;
 //	  std::cout << num << std::endl;
-	  exist_ideal = MAIKo.ShowIdealValues(idealvalue_out, exist_ideal);
-	  exist_teacher = MAIKo.ShowTeacherValues(teachervalue_out, exist_teacher);
+	  exist_ideal = MAIKo->ShowIdealValues(idealvalue_out, exist_ideal);
+	  exist_teacher = MAIKo->ShowTeacherValues(teachervalue_out, exist_teacher);
 	  
 	  // output event
 	  for(int ii=0;ii<2;ii++){
 	    for(int jj=0;jj<1024;jj++){
 	      for(int kk=0;kk<256;kk++){
-		tot_out << MAIKo.GetTOT(ii, jj, kk) << " ";
+		tot_out << MAIKo->GetTOT(ii, jj, kk) << " ";
 //		tot_out_2 << MAIKo.GetTOT(ii, jj, kk) << " ";
-		flush_out << MAIKo.GetFlush(ii, jj, kk) << " ";
+		flush_out << MAIKo->GetFlush(ii, jj, kk) << " ";
 	      }
 	    }
 	  }
@@ -112,6 +106,7 @@ int main(int argc, char *argv[]){
 	  status = 0;
 //	  tot_out_2.close();
 	}
+	delete MAIKo;
       }, scatter, pressure, tot_num);
   }
 

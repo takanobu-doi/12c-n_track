@@ -28,16 +28,20 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   beam_name = "n";
   // define event-id
   target_name = {"12C",
-		 "12C"
+		 "12C",
+		 "p"
   };
   particle_name = {{{"n", "12C"}},
-		   {{"n", "12C"}, {"4He", "4He", "4He"}}
-  };
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "p"}}
+  }; // last particle each bracket is not used for tracking, but all particle of the last bracket is used.
   particle_ex = {{{0, 0}},
-		 {{0, 7.65}, {0, 0, 0}}
+		 {{0, 7.65}, {0, 0}, {0, 0}},
+		 {{0, 0}}
   };
   particle_flag = {{false, false}, // true for stoped particles
-		   {false, true, true, true}
+		   {false, true, true, true},
+		   {false, false}
   };
   srim_name = "_CH4_";
   dirname = "table/";
@@ -289,11 +293,10 @@ int mktrack::SetRangeFile()
 {
   std::string rangefname;
   for(auto it1=(*(particle_name.begin()+event_id)).begin();it1!=(*(particle_name.begin()+event_id)).end();++it1){
+    if(EnetoRange.size()){
+      EnetoRange.pop_back();
+    }
     for(auto it=(*it1).begin();it!=(*it1).end();++it){
-      if(it==(*it1).begin()&&EnetoRange_temp.size()&&EnetoRange.size()){
-	EnetoRange_temp.pop_back();
-	EnetoRange.pop_back();
-      }
       if((*it)=="n"){
 	EnetoRange.push_back(nullptr);
 	continue;
@@ -316,8 +319,7 @@ int mktrack::SetRangeFile()
 	e.push_back(e_temp);
 	r.push_back(r_temp);
       }
-      EnetoRange_temp.push_back(new TGraph(e.size(), e.data(), r.data()));
-      EnetoRange.push_back(new TSpline5("EnetoRange", *(EnetoRange_temp.end()-1)));
+      EnetoRange.push_back(new TSpline5("EnetoRange", e.data(), r.data(), e.size()));
     }
   }
   return 1;
@@ -450,7 +452,7 @@ int mktrack::Generate(int &status, double &ex)
        ((r*dx[0]+vtx[0]<area[0][0] || r*dx[0]+vtx[0]>area[0][1] ||
 	 r*dx[1]+vtx[1]<area[1][0] || r*dx[1]+vtx[1]>area[1][1] ||
 	 r*dx[2]+vtx[2]<area[2][0] || r*dx[2]+vtx[2]>area[2][1])||
-	r<20)
+	r<0)
        ){
       return 0;
     }

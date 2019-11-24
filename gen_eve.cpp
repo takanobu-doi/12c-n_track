@@ -105,7 +105,29 @@ double  gen_eve::Generate()
   particles.clear();
 
   TLorentzVector w = W;
-  for(unsigned int jj=0;jj!=mass.size();++jj){
+  w.Boost(0, 0, -w.Beta());
+  double Ea, Pa;
+  Ea = (w.E()*w.E()+(mass[0][0]+Ex[0][0]/1000)*(mass[0][0]+Ex[0][0]/1000)
+	-(mass[0][1]+Ex[0][1]/1000)*(mass[0][1]+Ex[0][1]/1000))/(2*w.E());
+  Pa = TMath::Sqrt(Ea*Ea-(mass[0][0]+Ex[0][0]/1000)*(mass[0][0]+Ex[0][0]/1000));
+  TLorentzVector Eject(0, 0, -Pa, Ea);
+  Ea = (w.E()*w.E()-(mass[0][0]+Ex[0][0]/1000)*(mass[0][0]+Ex[0][0]/1000)
+	+(mass[0][1]+Ex[0][1]/1000)*(mass[0][1]+Ex[0][1]/1000))/(2*w.E());
+  Pa = TMath::Sqrt(Ea*Ea-(mass[0][1]+Ex[0][1]/1000)*(mass[0][1]+Ex[0][1]/1000));
+  TLorentzVector Recoil(0, 0, Pa, Ea);
+  
+  Eject.RotateX(TMath::ACos(rndm->Uniform(-1, 1)));
+  Eject.RotateX(rndm->Uniform(0, 2*TMath::Pi()));
+  Eject.Boost(0, 0, w.Beta()); 
+  particles.push_back(Eject); 
+  Recoil.RotateX(TMath::ACos(rndm->Uniform(-1, 1)));
+  Recoil.RotateX(rndm->Uniform(0, 2*TMath::Pi()));
+  Recoil.Boost(0, 0, w.Beta());
+  particles.push_back(Recoil);
+
+  w = Recoil;
+  
+  for(unsigned int jj=1;jj!=mass.size();++jj){
     std::vector<double> Mass;
     for(unsigned int ii=0;ii!=mass[jj].size();++ii){
       double m = mass[jj][ii];
@@ -117,9 +139,8 @@ double  gen_eve::Generate()
     do{
       weight = event->Generate();
       uniform_rndm = rndm->Uniform(0., weight_max);
-//    uniform_rndm = rndm->Uniform(0., event->GetWtMax());
     }while(uniform_rndm > weight);
-
+    
     if(particles.size()){
       particles.pop_back();
     }
@@ -128,7 +149,7 @@ double  gen_eve::Generate()
     }
     w = *(particles.end()-1);
   }
-  return 7.65; // this number has no mean.
+  return (Recoil.M()-mass[0][1])*1000; // this number has no mean.
 }
 
 double gen_eve::GetBeamMass()
