@@ -29,17 +29,21 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   // define event-id
   target_name = {"12C",
 		 "12C",
+		 "12C", 
 		 "p"
   };
   particle_name = {{{"n", "12C"}},
 		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "12C"}, {"4He", "4He", "4He"}},
 		   {{"n", "p"}}
   }; // last particle each bracket is not used for tracking, but all particle of the last bracket is used.
   particle_ex = {{{0, 0}},
 		 {{0, 7.65}, {0, 0}, {0, 0}},
+		 {{0, 7.65}, {0, 0, 0}},
 		 {{0, 0}}
   };
   particle_flag = {{false, false}, // true for stoped particles
+		   {false, true, true, true},
 		   {false, true, true, true},
 		   {false, false}
   };
@@ -426,7 +430,7 @@ int mktrack::Generate(int &status, double &ex)
   vtx[2] = rndm->Uniform(VTX_Z_START, VTX_Z_STOP);
   start_point[0] = vtx[0];
   start_point[1] = vtx[1];
-  start_point[2] = 105.;
+  start_point[2] = 0.;
   beam_area[2][0] = vtx[2];
   
 //  if(event->GetParticleVector(1).Theta()>92.*TMath::DegToRad()){

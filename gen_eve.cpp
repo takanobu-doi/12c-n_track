@@ -85,14 +85,14 @@ gen_eve::gen_eve(std::string BEAM_NAME, std::string TARGET_NAME, std::vector<std
 
   Ex = PARTICLE_EX;
 
-  event = new TGenPhaseSpace();
+//  event = new TGenPhaseSpace();
   rndm = new TRandom3();
   rndm->SetSeed(seed_gen());
 }
 
 gen_eve::~gen_eve()
 {
-  delete event;
+//  delete event;
   delete rndm;
 }
 
@@ -100,56 +100,68 @@ double  gen_eve::Generate()
 {
   double weight;
   double uniform_rndm;
-  double weight_max = 10;
+  double weight_max = 100;
 
   particles.clear();
 
   TLorentzVector w = W;
-  w.Boost(0, 0, -w.Beta());
+  w.Boost(0, 0, -W.Beta());
   double Ea, Pa;
   Ea = (w.E()*w.E()+(mass[0][0]+Ex[0][0]/1000)*(mass[0][0]+Ex[0][0]/1000)
 	-(mass[0][1]+Ex[0][1]/1000)*(mass[0][1]+Ex[0][1]/1000))/(2*w.E());
   Pa = TMath::Sqrt(Ea*Ea-(mass[0][0]+Ex[0][0]/1000)*(mass[0][0]+Ex[0][0]/1000));
-  TLorentzVector Eject(0, 0, -Pa, Ea);
+  TLorentzVector Eject(0, 0, Pa, Ea);
   Ea = (w.E()*w.E()-(mass[0][0]+Ex[0][0]/1000)*(mass[0][0]+Ex[0][0]/1000)
 	+(mass[0][1]+Ex[0][1]/1000)*(mass[0][1]+Ex[0][1]/1000))/(2*w.E());
   Pa = TMath::Sqrt(Ea*Ea-(mass[0][1]+Ex[0][1]/1000)*(mass[0][1]+Ex[0][1]/1000));
-  TLorentzVector Recoil(0, 0, Pa, Ea);
+  TLorentzVector Recoil(0, 0, -Pa, Ea);
 
   double Theta = TMath::ACos(rndm->Uniform(-1, 1));
   double Phi = rndm->Uniform(0, 2*TMath::Pi());
   Eject.RotateX(Theta);
-  Eject.RotateX(Phi);
-  Eject.Boost(0, 0, w.Beta()); 
+  Eject.RotateZ(Phi);
+  Eject.Boost(0, 0, W.Beta()); 
   particles.push_back(Eject); 
   Recoil.RotateX(Theta);
-  Recoil.RotateX(Phi);
-  Recoil.Boost(0, 0, w.Beta());
-  particles.push_back(Recoil);
-
-  w = Recoil;
+  Recoil.RotateZ(Phi);
+  Recoil.Boost(0, 0, W.Beta());
+  if(mass.size()==1){
+    particles.push_back(Recoil);
+  }else{
+    w = Recoil;
+  }
   
   for(unsigned int jj=1;jj!=mass.size();++jj){
     std::vector<double> Mass;
+    TGenPhaseSpace event;
     for(unsigned int ii=0;ii!=mass[jj].size();++ii){
       double m = mass[jj][ii];
       double ex = Ex[jj][ii];
       m = m+ex/1000.;
       Mass.push_back(m);
     }
-    event->SetDecay(w, Mass.size(), Mass.data());
+    event.SetDecay(w, Mass.size(), Mass.data());
     do{
-      weight = event->Generate();
+      weight = event.Generate();
       uniform_rndm = rndm->Uniform(0., weight_max);
     }while(uniform_rndm > weight);
     
-    if(particles.size()){
-      particles.pop_back();
+//    if(particles.size()){
+//      particles.pop_back();
+//    }
+//    for(unsigned int ii=0;ii<Mass.size();ii++){
+//      particles.push_back(*event->GetDecay(ii));
+//    }
+    for(unsigned int ii=0;ii!=Mass.size()-1;++ii){
+//      TLorentzVector vec = *event.GetDecay(ii);
+//      particles.push_back(vec);
+      particles.push_back(*event.GetDecay(ii));
     }
-    for(unsigned int ii=0;ii<Mass.size();ii++){
-      particles.push_back(*event->GetDecay(ii));
+    if(jj!=mass.size()-1){
+      w = *(event.GetDecay(Mass.size()-1));
+    }else{
+      particles.push_back(*event.GetDecay(Mass.size()-1));
     }
-    w = *(particles.end()-1);
   }
   return (Recoil.M()-mass[0][1])*1000; // this number has no mean.
 }

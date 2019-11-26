@@ -31,7 +31,7 @@ private:
   TLorentzVector W;
   std::vector<TLorentzVector> particles;
 
-  TGenPhaseSpace *event;
+//  TGenPhaseSpace *event;
 
   std::random_device seed_gen;
   TRandom3 *rndm;
