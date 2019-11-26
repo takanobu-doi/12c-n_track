@@ -79,7 +79,7 @@ gen_eve::gen_eve(std::string BEAM_NAME, std::string TARGET_NAME, std::vector<std
   }
   E_beam = T_beam/1000.+mass_beam; // total energy of incident particle [GeV]
   P_beam = TMath::Sqrt(E_beam*E_beam-mass_beam*mass_beam); // P [GeV/c]
-  beam = TLorentzVector(0., 0., -P_beam, E_beam); // assume z-axis direction
+  beam = TLorentzVector(0., 0., P_beam, E_beam); // assume z-axis direction
   target = TLorentzVector(0., 0., 0., mass_target);
   W = beam+target;
 
@@ -115,13 +115,15 @@ double  gen_eve::Generate()
 	+(mass[0][1]+Ex[0][1]/1000)*(mass[0][1]+Ex[0][1]/1000))/(2*w.E());
   Pa = TMath::Sqrt(Ea*Ea-(mass[0][1]+Ex[0][1]/1000)*(mass[0][1]+Ex[0][1]/1000));
   TLorentzVector Recoil(0, 0, Pa, Ea);
-  
-  Eject.RotateX(TMath::ACos(rndm->Uniform(-1, 1)));
-  Eject.RotateX(rndm->Uniform(0, 2*TMath::Pi()));
+
+  double Theta = TMath::ACos(rndm->Uniform(-1, 1));
+  double Phi = rndm->Uniform(0, 2*TMath::Pi());
+  Eject.RotateX(Theta);
+  Eject.RotateX(Phi);
   Eject.Boost(0, 0, w.Beta()); 
   particles.push_back(Eject); 
-  Recoil.RotateX(TMath::ACos(rndm->Uniform(-1, 1)));
-  Recoil.RotateX(rndm->Uniform(0, 2*TMath::Pi()));
+  Recoil.RotateX(Theta);
+  Recoil.RotateX(Phi);
   Recoil.Boost(0, 0, w.Beta());
   particles.push_back(Recoil);
 
