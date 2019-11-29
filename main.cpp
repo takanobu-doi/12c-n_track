@@ -121,7 +121,7 @@ int main(int argc, char *argv[]){
   param_out << "Reaction              : " << reaction[scatter] << std::endl;
   param_out << "Number of events      : " << event_num << std::endl;
   param_out << "Pressure (hPa)        : " << pressure << std::endl;
-  param_out << "Drift velocity (mm/ns): " << drift_v << std::endl;
+  param_out << "Drift velocity (cm/ns): " << drift_v << std::endl;
   param_out.close();
   
   std::cout << "\e[?25l" << std::flush; // disappear cursol

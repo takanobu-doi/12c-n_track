@@ -592,9 +592,9 @@ int mktrack::GenTrack(TrackSrim *srim, TLorentzVector particle_vec, double VTX[3
   temp_point.push_back(end_a);
   temp_point.push_back(end_c);
   point.push_back(temp_point);
-  range.push_back(TMath::Sqrt((VTX[0]-cluster_pos[1])*(VTX[0]-cluster_pos[1])+
-			      (VTX[1]-cluster_pos[2])*(VTX[1]-cluster_pos[2])+
-			      (VTX[2]-cluster_pos[3])*(VTX[2]-cluster_pos[3])));
+  range.push_back(TMath::Sqrt((VTX[0]-cluster_pos[1]*cmTomm)*(VTX[0]-cluster_pos[1]*cmTomm)+
+			      (VTX[1]-cluster_pos[2]*cmTomm)*(VTX[1]-cluster_pos[2]*cmTomm)+
+			      (VTX[2]-cluster_pos[3]*cmTomm)*(VTX[2]-cluster_pos[3]*cmTomm)));
   return 1;
 }
 
