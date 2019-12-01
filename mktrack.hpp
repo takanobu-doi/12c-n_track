@@ -76,6 +76,9 @@ private:
   double beam_energy;
   double Ex_min;
   double Ex_max;
+  double BEAM_RADIUS;
+  double BEAM_X_CENTER;
+  double BEAM_Y_CENTER;
   double VTX_X_MEAN;
   double VTX_X_SIGMA;
   double VTX_Y_MEAN;

@@ -30,21 +30,29 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   target_name = {"12C",
 		 "12C",
 		 "12C", 
+		 "12C", 
+		 "12C", 
 		 "p"
   };
   particle_name = {{{"n", "12C"}},
 		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
-		   {{"n", "12C"}, {"4He", "4He", "4He"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
 		   {{"n", "p"}}
   }; // last particle each bracket is not used for tracking, but all particle of the last bracket is used.
   particle_ex = {{{0, 0}},
 		 {{0, 7.65}, {0, 0}, {0, 0}},
-		 {{0, 7.65}, {0, 0, 0}},
+		 {{0, 7.65}, {0, 0}, {0, 0}},
+		 {{0, 9.64}, {0, 0}, {0, 0}},
+		 {{0, 9.64}, {0, 0}, {0, 0}},
 		 {{0, 0}}
   };
   particle_flag = {{false, false}, // true for stoped particles
 		   {false, true, true, true},
+		   {false, false, false, false},
 		   {false, true, true, true},
+		   {false, false, false, false},
 		   {false, false}
   };
   srim_name = "_CH4_";
@@ -54,14 +62,17 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   beam_energy = 14; // [MeV]
   Ex_min = 0.; // [MeV]
   Ex_max = 20.; // [MeV]
-  VTX_X_MEAN = 102.4/2.;
-  VTX_X_SIGMA = 0.1;
-  VTX_Y_MEAN = 140./2.;
-  VTX_Y_SIGMA = 0.1;
-  VTX_Y_START = 140.*1/8.;
-  VTX_Y_STOP = 140.*7/8;
-  VTX_Z_START = 102.4*1/8.;
-  VTX_Z_STOP = 102.4*5/8;
+  BEAM_RADIUS = 10;         // mm
+  BEAM_X_CENTER = 102.4/2.; // mm
+  BEAM_Y_CENTER = 140./2.;  // mm
+  VTX_X_MEAN = 102.4/2.;    // mm
+  VTX_X_SIGMA = 0.1;	    // mm
+  VTX_Y_MEAN = 140./2.;	    // mm
+  VTX_Y_SIGMA = 0.1;	    // mm
+  VTX_Y_START = 140.*1/8.;  // mm
+  VTX_Y_STOP = 140.*7/8;    // mm
+  VTX_Z_START = 102.4*1/8.; // mm
+  VTX_Z_STOP = 102.4*5/8;   // mm       
   // gas parameters
   W_Val = 10.0;
   Fano_Factor = 1.0;
@@ -101,7 +112,7 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   mmTocm = 0.1;
   threshold = 1.; // default is 1.0
 
-  buff = 30;
+  buff = 50;
   return;
 }
 
@@ -424,9 +435,15 @@ int mktrack::Generate(int &status, double &ex)
   status = 1;
   ex = event->Generate();
 
-  vtx[0] = rndm->Gaus(VTX_X_MEAN, VTX_X_SIGMA);
+//  vtx[0] = rndm->Gaus(VTX_X_MEAN, VTX_X_SIGMA);
 //  vtx[1] = rndm->Gaus(VTX_Y_MEAN, VTX_Y_SIGMA);
-  vtx[1] = rndm->Uniform(VTX_Y_START, VTX_Y_STOP);
+//  vtx[1] = rndm->Uniform(VTX_Y_START, VTX_Y_STOP);
+  do{
+    vtx[0] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
+    vtx[1] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
+  }while(TMath::Sqrt(vtx[0]*vtx[0]+vtx[1]*vtx[1])>BEAM_RADIUS);
+  vtx[0] += BEAM_X_CENTER;
+  vtx[1] += BEAM_Y_CENTER;
   vtx[2] = rndm->Uniform(VTX_Z_START, VTX_Z_STOP);
   start_point[0] = vtx[0];
   start_point[1] = vtx[1];
@@ -491,9 +508,9 @@ int mktrack::Generate(int &status, double &ex)
 //    return 0;
 //  }
 
-//  // modify triger timing
-//  int shifted = ModTrack();
-//
+  // modify triger timing
+  int shifted = ModTrack();
+
 //  // modify labeled point "y-shifted"
 //  for(unsigned int i=0;i<point.size();i++){
 //    point[i][0][1] = point[i][0][1]-shifted;
@@ -600,7 +617,7 @@ int mktrack::GenTrack(TrackSrim *srim, TLorentzVector particle_vec, double VTX[3
 
 int mktrack::ModTrack()
 {
-  int triger = 0;
+  int triger = -1;
   for(int jj=0;jj<1024;++jj){
     for(int kk=0;kk<256;++kk){
       if(flush[0][jj][kk]>threshold){
@@ -608,7 +625,7 @@ int mktrack::ModTrack()
 	break;
       }
     }
-    if(triger!=0){
+    if(triger!=-1){
       break;
     }
   }
