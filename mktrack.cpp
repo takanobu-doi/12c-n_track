@@ -74,7 +74,7 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   VTX_Z_START = 102.4*1/8.; // mm
   VTX_Z_STOP = 102.4*5/8;   // mm       
   // gas parameters
-  W_Val = 10.0;
+  W_Val = 30.0;
   Fano_Factor = 1.0;
   Mass_Gas = 16.;
   Charge_Gas = 10.;
@@ -102,15 +102,16 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   area[2][1] = 102.4;
   beam_area[0][0] = 0.;
   beam_area[1][0] = 0.;
+  beam_area[2][1] = 0.;
   beam_area[0][1] = 102.4;
   beam_area[1][1] = 140.;
-  beam_area[2][1] = 150.;
-  gain = 300.; // default is 1000.
+  gain = 90.; // default is 1000.
   ie_step = 1; // default is 100
 
   cmTomm = 10.;
   mmTocm = 0.1;
-  threshold = 1.; // default is 1.0
+  threshold[0] = 0.02; // anode
+  threshold[1] = 0.1;  //cathode
 
   buff = 50;
   return;
@@ -448,7 +449,7 @@ int mktrack::Generate(int &status, double &ex)
   start_point[0] = vtx[0];
   start_point[1] = vtx[1];
   start_point[2] = 0.;
-  beam_area[2][0] = vtx[2];
+  beam_area[2][1] = vtx[2];
   
 //  if(event->GetParticleVector(1).Theta()>92.*TMath::DegToRad()){
 //    return 0;
@@ -620,7 +621,7 @@ int mktrack::ModTrack()
   int triger = -1;
   for(int jj=0;jj<1024;++jj){
     for(int kk=0;kk<256;++kk){
-      if(flush[0][jj][kk]>threshold){
+      if(flush[0][jj][kk]>threshold[0]){
 	triger = jj;
 	break;
       }
@@ -664,7 +665,7 @@ double mktrack::GetFlush(int ii, int jj, int kk)
 
 int mktrack::GetTOT(int ii, int jj, int kk)
 {
-  if(flush[ii][jj][kk]>threshold){
+  if(flush[ii][jj][kk]>threshold[ii]){
     return 1;
   }else{
     return 0;
@@ -788,10 +789,10 @@ void mktrack::ElectronDrift(double cluster_pos1, double cluster_pos2, double clu
 			double &ele_end_pos1, double &ele_end_pos2, double &ele_end_pos3, double &ele_end_pos0)
 {
   double drift_len = cluster_pos2-0;
-//  double sigma_tra = diff_tra*sqrt(drift_len);
-//  double sigma_long = diff_long*sqrt(drift_len);
-  double sigma_tra = 0.08; // [cm]
-  double sigma_long = 0.08; // [cm]
+  double sigma_tra = diff_tra*sqrt(drift_len);
+  double sigma_long = diff_long*sqrt(drift_len);
+//  double sigma_tra = 0.08; // [cm]
+//  double sigma_long = 0.08; // [cm]
 
   ele_end_pos0 = (drift_len+rndm->Gaus(0, sigma_long))/(driftv); // ns
   if(ele_end_pos0<0){
