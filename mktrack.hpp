@@ -117,7 +117,7 @@ private:
   int ie_step;
   double cmTomm;
   double mmTocm;
-  double threshold;
+  double threshold[2];
 
   std::vector<std::vector<std::vector<double>>> point;
   std::vector<double> range;

@@ -79,7 +79,11 @@ gen_eve::gen_eve(std::string BEAM_NAME, std::string TARGET_NAME, std::vector<std
   }
   E_beam = T_beam/1000.+mass_beam; // total energy of incident particle [GeV]
   P_beam = TMath::Sqrt(E_beam*E_beam-mass_beam*mass_beam); // P [GeV/c]
-  beam = TLorentzVector(0., 0., P_beam, E_beam); // assume z-axis direction
+  beam = TLorentzVector(0., 0., P_beam, E_beam); // 0 degree
+//  beam = TLorentzVector(0.,
+//			-P_beam*TMath::Sin(30*TMath::DegToRad()),
+//			P_beam*TMath::Cos(30*TMath::DegToRad()),
+//			E_beam); // 30 degree
   target = TLorentzVector(0., 0., 0., mass_target);
   W = beam+target;
 
@@ -116,8 +120,10 @@ double  gen_eve::Generate()
   Pa = TMath::Sqrt(Ea*Ea-(mass[0][1]+Ex[0][1]/1000)*(mass[0][1]+Ex[0][1]/1000));
   TLorentzVector Recoil(0, 0, -Pa, Ea);
 
-  double Theta = TMath::ACos(rndm->Uniform(-1, 1));
-  double Phi = rndm->Uniform(0, 2*TMath::Pi());
+//  double Theta = TMath::ACos(rndam->Uniform(-1, 1));
+//  double Phi = rndm->Uniform(0, 2*TMath::Pi());
+  double Theta = 1;
+  double Phi = 0;
   Eject.RotateX(Theta);
   Eject.RotateZ(Phi);
   Eject.Boost(0, 0, W.Beta()); 

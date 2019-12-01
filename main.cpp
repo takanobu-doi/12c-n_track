@@ -18,12 +18,7 @@ int main(int argc, char *argv[]){
   int scatter;
   int pressure;
 
-  std::vector<std::string> reaction = {"12C(n,n)12C",
-				       "12C(n,n)3a (7.65)",
-				       "12C(n,n)3a (7.65)",
-				       "12C(n,n)3a (9.64)",
-				       "12C(n,n)3a (9.64)",
-				       "p(n,n)p"};
+  std::vector<std::string> reaction = {"alpha"};
 
   if(check_cmd(argc, argv, reaction, event_num, fname, scatter, pressure) == 0){
     return 1;
