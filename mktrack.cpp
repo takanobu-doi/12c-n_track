@@ -55,8 +55,8 @@ void mktrack::SetParameters(int Event_id, int Pressure)
 		   {false, false, false, false},
 		   {false, false}
   };
-  srim_name = "CH4_";
-//  srim_name = "CH4_H2_";
+//  srim_name = "CH4_";
+  srim_name = "CH4_H2_";
 //  srim_name = "CH4_He_";
   dirname = "table/";
   event_id = Event_id;
@@ -81,7 +81,7 @@ void mktrack::SetParameters(int Event_id, int Pressure)
     Mass_Gas = 16.;   // for CH4 
     Charge_Gas = 10.; // for CH4
     density = 0.00065819*pressure/1000.; // for CH4
-  }else if(srim_name == "CH4_H2"){
+  }else if(srim_name == "CH4_H2_"){
     W_Val = 30.0*0.3+13.6*0.7; // for CH4 3 H2 4
     Mass_Gas = 16.*0.3+2.*0.7;   // for CH4 3 H2 7
     Charge_Gas = 10.*0.3+2.*0.7; // for CH4 3 H2 7
@@ -104,8 +104,8 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   half[1] = 14./2;
   half[2] = 14./2;
   y_plate = 14.;
-  v_plate = -1320.; // for CH4 50hPa
-//  v_plate = -1850.; // for CH4 3 H2 7 100hPa
+//  v_plate = -1320.; // for CH4 50hPa
+  v_plate = -1850.; // for CH4 3 H2 7 100hPa
 //  v_plate = -1370.; // for CH4 100hPa
 //  v_plate = -1515.; // for CH4 4 He 6 100hPa
   y_grid = 0.;
@@ -123,7 +123,7 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   beam_area[0][1] = 102.4;
   beam_area[1][1] = 140.;
 //  gain = 100.;
-  gain = 200.; // default is 1000.
+  gain = 100.; // default is 1000.
   ie_step = 1; // default is 100
 
   cmTomm = 10.;
