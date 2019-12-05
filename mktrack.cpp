@@ -35,9 +35,9 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   };
   particle_flag = {{false, false}
   };
-  srim_name = "CH4_";
+//  srim_name = "CH4_";
 //  srim_name = "CH4_H2_";
-//  srim_name = "CH4_He_";
+  srim_name = "CH4_He_";
   dirname = "table/";
   event_id = Event_id;
   pressure = Pressure;
@@ -86,8 +86,8 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   y_plate = 14.;
 //  v_plate = -1320.; // for CH4 50hPa
 //  v_plate = -1850.; // for CH4 3 H2 7 100hPa
-  v_plate = -1370.; // for CH4 100hPa
-//  v_plate = -1515.; // for CH4 4 He 6 100hPa
+//  v_plate = -1370.; // for CH4 100hPa
+  v_plate = -1515.; // for CH4 4 He 6 100hPa
   y_grid = 0.;
   v_grid = -1250.;
   E_FIELD = (v_grid-v_plate)/(y_plate-y_grid);
