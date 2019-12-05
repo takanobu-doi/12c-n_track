@@ -55,7 +55,9 @@ void mktrack::SetParameters(int Event_id, int Pressure)
 		   {false, false, false, false},
 		   {false, false}
   };
-  srim_name = "_CH4_";
+  srim_name = "CH4_";
+//  srim_name = "CH4_H2_";
+//  srim_name = "CH4_He_";
   dirname = "table/";
   event_id = Event_id;
   pressure = Pressure;
@@ -74,11 +76,23 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   VTX_Z_START = 102.4*1/8.; // mm
   VTX_Z_STOP = 102.4*5/8;   // mm       
   // gas parameters
-  W_Val = 30.0;
+  if(srim_name == "CH4_"){
+    W_Val = 30.0; // for CH4
+    Mass_Gas = 16.;   // for CH4 
+    Charge_Gas = 10.; // for CH4
+    density = 0.00065819*pressure/1000.; // for CH4
+  }else if(srim_name == "CH4_H2"){
+    W_Val = 30.0*0.3+13.6*0.7; // for CH4 3 H2 4
+    Mass_Gas = 16.*0.3+2.*0.7;   // for CH4 3 H2 7
+    Charge_Gas = 10.*0.3+2.*0.7; // for CH4 3 H2 7
+    density = 0.000025535*pressure/100.; // for CH4 3 H2 7
+  }else if(srim_name == "CH4_He_"){
+    W_Val = 30.0*0.4+41.3*0.6; // for CH4 4 He 6
+    Mass_Gas = 16.*0.4+4*0.6;   // for CH4 4 He 6
+    Charge_Gas = 10.*0.4+2*0.6; // for CH4 4 He 6
+    density = 0.000036181*pressure/100.; // for CH4 4 He 6
+  }
   Fano_Factor = 1.0;
-  Mass_Gas = 16.;
-  Charge_Gas = 10.;
-  density = 0.00065819*pressure/1000.;
   Cluster_Size = 1; // default is 30
   Beam_Cluster_Size = 1;
   Particle_Cluster_Size = 20;
@@ -90,7 +104,10 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   half[1] = 14./2;
   half[2] = 14./2;
   y_plate = 14.;
-  v_plate = -1320.;
+  v_plate = -1320.; // for CH4 50hPa
+//  v_plate = -1850.; // for CH4 3 H2 7 100hPa
+//  v_plate = -1370.; // for CH4 100hPa
+//  v_plate = -1515.; // for CH4 4 He 6 100hPa
   y_grid = 0.;
   v_grid = -1250.;
   E_FIELD = (v_grid-v_plate)/(y_plate-y_grid);
@@ -105,12 +122,13 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   beam_area[2][1] = 0.;
   beam_area[0][1] = 102.4;
   beam_area[1][1] = 140.;
-  gain = 90.; // default is 1000.
+//  gain = 100.;
+  gain = 200.; // default is 1000.
   ie_step = 1; // default is 100
 
   cmTomm = 10.;
   mmTocm = 0.1;
-  threshold[0] = 0.02; // anode
+  threshold[0] = 0.1; // anode
   threshold[1] = 0.1;  //cathode
 
   buff = 50;
@@ -207,7 +225,7 @@ void mktrack::Initialize(int Event_id, int Pressure){
 
 int mktrack::SetGasFile()
 {
-  std::string magfname = dirname+"CH4_"+std::to_string(pressure)+".gas";
+  std::string magfname = dirname+srim_name+std::to_string(pressure)+".gas";
   gas = new MediumMagboltz();
   std::cout << "Loading gasfile: " << magfname << std::endl;
   if(gas->LoadGasFile(magfname)==0){
@@ -222,7 +240,7 @@ int mktrack::SetSrimFile()
   if(beam_name=="n"){
     srim_beam = nullptr;
   }else{
-    srimfname = dirname+beam_name+srim_name+std::to_string(pressure)+".srim";
+    srimfname = dirname+beam_name+"_"+srim_name+std::to_string(pressure)+".srim";
   
     srim_beam = new TrackSrim();
     if(sensor == nullptr){
@@ -254,7 +272,7 @@ int mktrack::SetSrimFile()
 	srim_particle.push_back(nullptr);
 	continue;
       }
-      srimfname = dirname+(*it)+"_CH4_"+std::to_string(pressure)+".srim";
+      srimfname = dirname+(*it)+"_"+srim_name+std::to_string(pressure)+".srim";
       srim_particle.push_back(new TrackSrim());
       (*(srim_particle.end()-1))->SetSensor(sensor);
 //    std::cout << "Loading srimfile: " << srimfname << std::endl;
@@ -317,7 +335,7 @@ int mktrack::SetRangeFile()
 	EnetoRange.push_back(nullptr);
 	continue;
       }
-      rangefname = dirname+(*it)+"_"+std::to_string(pressure)+"_ene_to_range.dat";
+      rangefname = dirname+(*it)+"_"+srim_name+std::to_string(pressure)+"_ene_to_range.dat";
       std::ifstream ifile(rangefname);
       if(ifile.fail()){
 	std::cerr << "There is not " << rangefname << std::endl;
