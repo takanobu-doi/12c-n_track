@@ -35,13 +35,14 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   };
   particle_flag = {{false, false}
   };
-//  srim_name = "CH4_";
+  srim_name = "CH4_";
 //  srim_name = "CH4_H2_";
-  srim_name = "CH4_He_";
+//  srim_name = "CH4_He_";
   dirname = "table/";
   event_id = Event_id;
   pressure = Pressure;
-  beam_energy = 4.2; // [MeV]
+//  beam_energy = 4.2; // [MeV]
+  beam_energy = 0.8;
   Ex_min = 0.; // [MeV]
   Ex_max = 20.; // [MeV]
   BEAM_RADIUS = 0.1;         // mm
@@ -84,10 +85,10 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   half[1] = 14./2;
   half[2] = 14./2;
   y_plate = 14.;
-//  v_plate = -1320.; // for CH4 50hPa
+  v_plate = -1320.; // for CH4 50hPa
 //  v_plate = -1850.; // for CH4 3 H2 7 100hPa
 //  v_plate = -1370.; // for CH4 100hPa
-  v_plate = -1515.; // for CH4 4 He 6 100hPa
+//  v_plate = -1515.; // for CH4 4 He 6 100hPa
   y_grid = 0.;
   v_grid = -1250.;
   E_FIELD = (v_grid-v_plate)/(y_plate-y_grid);
@@ -239,8 +240,10 @@ int mktrack::SetSrimFile()
 				    Charge_Gas);
     srim_beam->SetDensity(density);
     srim_beam->SetTargetClusterSize(Cluster_Size);
-    srim_beam->DisableTransverseStraggling();
-    srim_beam->DisableLongitudinalStraggling();
+//    srim_beam->DisableTransverseStraggling();
+//    srim_beam->DisableLongitudinalStraggling();
+    srim_beam->EnableTransverseStraggling();
+    srim_beam->EnableLongitudinalStraggling();
   }
   
   for(auto it1=(*(particle_name.begin()+event_id)).begin();it1!=(*(particle_name.begin()+event_id)).end();++it1){
@@ -266,8 +269,10 @@ int mktrack::SetSrimFile()
 						       Charge_Gas);
       (*(srim_particle.end()-1))->SetDensity(density);
       (*(srim_particle.end()-1))->SetTargetClusterSize(Cluster_Size);
-      (*(srim_particle.end()-1))->DisableTransverseStraggling();
-      (*(srim_particle.end()-1))->DisableLongitudinalStraggling();
+//      (*(srim_particle.end()-1))->DisableTransverseStraggling();
+//      (*(srim_particle.end()-1))->DisableLongitudinalStraggling();
+      (*(srim_particle.end()-1))->EnableTransverseStraggling();
+      (*(srim_particle.end()-1))->EnableLongitudinalStraggling();
     }
   }
 
@@ -437,12 +442,12 @@ int mktrack::Generate(int &status, double &ex)
 //  vtx[0] = rndm->Gaus(VTX_X_MEAN, VTX_X_SIGMA);
 //  vtx[1] = rndm->Gaus(VTX_Y_MEAN, VTX_Y_SIGMA);
 //  vtx[1] = rndm->Uniform(VTX_Y_START, VTX_Y_STOP);
-  do{
-    vtx[0] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
-    vtx[1] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
-  }while(TMath::Sqrt(vtx[0]*vtx[0]+vtx[1]*vtx[1])>BEAM_RADIUS);
-  vtx[0] += BEAM_X_CENTER;
-  vtx[1] += BEAM_Y_CENTER;
+//  do{
+//    vtx[0] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
+//    vtx[1] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
+//  }while(TMath::Sqrt(vtx[0]*vtx[0]+vtx[1]*vtx[1])>BEAM_RADIUS);
+  vtx[0] = BEAM_X_CENTER;
+  vtx[1] = BEAM_Y_CENTER;
   vtx[2] = VTX_Z_STOP;
   start_point[0] = vtx[0];
   start_point[1] = vtx[1];
