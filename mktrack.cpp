@@ -27,13 +27,33 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   // general parameters
   beam_name = "4He";
   // define event-id
-  target_name = {"n"
+  target_name = {"12C",
+		 "12C",
+		 "12C",
+		 "12C",
+		 "12C",
+		 "p"
   };
-  particle_name = {{{"n", "4He"}}
+  particle_name = {{{"n", "12C"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "p"}}
   }; // last particle each bracket is not used for tracking, but all particle of the last bracket is used.
-  particle_ex = {{{0, 0}}
+  particle_ex = {{{0, 0}},
+		 {{0, 7.65}, {0, 0}, {0, 0}},
+		 {{0, 7.65}, {0, 0}, {0, 0}},
+		 {{0, 9.64}, {0, 0}, {0, 0}},
+		 {{0, 9.64}, {0, 0}, {0, 0}},
+		 {{0, 0}}
   };
-  particle_flag = {{false, false}
+  particle_flag = {{false, false},
+		   {false, true, true, true},
+		   {false, false, false, false},
+		   {false, true, true, true},
+		   {false, false, false, false},
+		   {false, false}
   };
 //  srim_name = "CH4_";
   srim_name = "CH4_H2_";
@@ -41,13 +61,13 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   dirname = "table/";
   event_id = Event_id;
   pressure = Pressure;
-//  beam_energy = 4.2; // [MeV]
-  beam_energy = 0.8;
+  beam_energy = 4.2; // [MeV]
+//  beam_energy = 0.8;
   Ex_min = 0.; // [MeV]
   Ex_max = 20.; // [MeV]
   BEAM_RADIUS = 0.1;         // mm
   BEAM_X_CENTER = 102.4/2.; // mm
-  BEAM_Y_CENTER = 140.*0.8;  // mm
+  BEAM_Y_CENTER = 140./2.;  // mm
   VTX_X_MEAN = 102.4/2.;    // mm
   VTX_X_SIGMA = 0.1;	    // mm
   VTX_Y_MEAN = 140./2.;	    // mm
@@ -442,12 +462,12 @@ int mktrack::Generate(int &status, double &ex)
 //  vtx[0] = rndm->Gaus(VTX_X_MEAN, VTX_X_SIGMA);
 //  vtx[1] = rndm->Gaus(VTX_Y_MEAN, VTX_Y_SIGMA);
 //  vtx[1] = rndm->Uniform(VTX_Y_START, VTX_Y_STOP);
-//  do{
-//    vtx[0] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
-//    vtx[1] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
-//  }while(TMath::Sqrt(vtx[0]*vtx[0]+vtx[1]*vtx[1])>BEAM_RADIUS);
-  vtx[0] = BEAM_X_CENTER;
-  vtx[1] = BEAM_Y_CENTER;
+  do{
+    vtx[0] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
+    vtx[1] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
+  }while(TMath::Sqrt(vtx[0]*vtx[0]+vtx[1]*vtx[1])>BEAM_RADIUS);
+  vtx[0] += BEAM_X_CENTER;
+  vtx[1] += BEAM_Y_CENTER;
   vtx[2] = VTX_Z_STOP;
   start_point[0] = vtx[0];
   start_point[1] = vtx[1];
