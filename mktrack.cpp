@@ -25,35 +25,15 @@ using namespace Garfield;
 void mktrack::SetParameters(int Event_id, int Pressure)
 {
   // general parameters
-  beam_name = "n";
+  beam_name = "4He";
   // define event-id
-  target_name = {"12C",
-		 "12C",
-		 "12C", 
-		 "12C", 
-		 "12C", 
-		 "p"
+  target_name = {"n"
   };
-  particle_name = {{{"n", "12C"}},
-		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
-		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
-		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
-		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
-		   {{"n", "p"}}
+  particle_name = {{{"n", "4He"}}
   }; // last particle each bracket is not used for tracking, but all particle of the last bracket is used.
-  particle_ex = {{{0, 0}},
-		 {{0, 7.65}, {0, 0}, {0, 0}},
-		 {{0, 7.65}, {0, 0}, {0, 0}},
-		 {{0, 9.64}, {0, 0}, {0, 0}},
-		 {{0, 9.64}, {0, 0}, {0, 0}},
-		 {{0, 0}}
+  particle_ex = {{{0, 0}}
   };
-  particle_flag = {{false, false}, // true for stoped particles
-		   {false, true, true, true},
-		   {false, false, false, false},
-		   {false, true, true, true},
-		   {false, false, false, false},
-		   {false, false}
+  particle_flag = {{false, false}
   };
 //  srim_name = "CH4_";
   srim_name = "CH4_H2_";
@@ -61,12 +41,13 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   dirname = "table/";
   event_id = Event_id;
   pressure = Pressure;
-  beam_energy = 14; // [MeV]
+//  beam_energy = 4.2; // [MeV]
+  beam_energy = 0.8;
   Ex_min = 0.; // [MeV]
   Ex_max = 20.; // [MeV]
-  BEAM_RADIUS = 10;         // mm
+  BEAM_RADIUS = 0.1;         // mm
   BEAM_X_CENTER = 102.4/2.; // mm
-  BEAM_Y_CENTER = 140./2.;  // mm
+  BEAM_Y_CENTER = 140.*0.8;  // mm
   VTX_X_MEAN = 102.4/2.;    // mm
   VTX_X_SIGMA = 0.1;	    // mm
   VTX_Y_MEAN = 140./2.;	    // mm
@@ -74,7 +55,7 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   VTX_Y_START = 140.*1/8.;  // mm
   VTX_Y_STOP = 140.*7/8;    // mm
   VTX_Z_START = 102.4*1/8.; // mm
-  VTX_Z_STOP = 102.4*5/8;   // mm       
+  VTX_Z_STOP = 102.4*9/8;   // mm       
   // gas parameters
   if(srim_name == "CH4_"){
     W_Val = 30.0; // for CH4
@@ -123,7 +104,7 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   beam_area[0][1] = 102.4;
   beam_area[1][1] = 140.;
 //  gain = 100.;
-  gain = 100.; // default is 1000.
+  gain = 300.; // default is 1000.
   ie_step = 1; // default is 100
 
   cmTomm = 10.;
@@ -259,8 +240,10 @@ int mktrack::SetSrimFile()
 				    Charge_Gas);
     srim_beam->SetDensity(density);
     srim_beam->SetTargetClusterSize(Cluster_Size);
-    srim_beam->DisableTransverseStraggling();
-    srim_beam->DisableLongitudinalStraggling();
+//    srim_beam->DisableTransverseStraggling();
+//    srim_beam->DisableLongitudinalStraggling();
+    srim_beam->EnableTransverseStraggling();
+    srim_beam->EnableLongitudinalStraggling();
   }
   
   for(auto it1=(*(particle_name.begin()+event_id)).begin();it1!=(*(particle_name.begin()+event_id)).end();++it1){
@@ -286,8 +269,10 @@ int mktrack::SetSrimFile()
 						       Charge_Gas);
       (*(srim_particle.end()-1))->SetDensity(density);
       (*(srim_particle.end()-1))->SetTargetClusterSize(Cluster_Size);
-      (*(srim_particle.end()-1))->DisableTransverseStraggling();
-      (*(srim_particle.end()-1))->DisableLongitudinalStraggling();
+//      (*(srim_particle.end()-1))->DisableTransverseStraggling();
+//      (*(srim_particle.end()-1))->DisableLongitudinalStraggling();
+      (*(srim_particle.end()-1))->EnableTransverseStraggling();
+      (*(srim_particle.end()-1))->EnableLongitudinalStraggling();
     }
   }
 
@@ -457,13 +442,13 @@ int mktrack::Generate(int &status, double &ex)
 //  vtx[0] = rndm->Gaus(VTX_X_MEAN, VTX_X_SIGMA);
 //  vtx[1] = rndm->Gaus(VTX_Y_MEAN, VTX_Y_SIGMA);
 //  vtx[1] = rndm->Uniform(VTX_Y_START, VTX_Y_STOP);
-  do{
-    vtx[0] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
-    vtx[1] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
-  }while(TMath::Sqrt(vtx[0]*vtx[0]+vtx[1]*vtx[1])>BEAM_RADIUS);
-  vtx[0] += BEAM_X_CENTER;
-  vtx[1] += BEAM_Y_CENTER;
-  vtx[2] = rndm->Uniform(VTX_Z_START, VTX_Z_STOP);
+//  do{
+//    vtx[0] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
+//    vtx[1] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
+//  }while(TMath::Sqrt(vtx[0]*vtx[0]+vtx[1]*vtx[1])>BEAM_RADIUS);
+  vtx[0] = BEAM_X_CENTER;
+  vtx[1] = BEAM_Y_CENTER;
+  vtx[2] = VTX_Z_STOP;
   start_point[0] = vtx[0];
   start_point[1] = vtx[1];
   start_point[2] = 0.;
@@ -807,8 +792,8 @@ void mktrack::ElectronDrift(double cluster_pos1, double cluster_pos2, double clu
 			double &ele_end_pos1, double &ele_end_pos2, double &ele_end_pos3, double &ele_end_pos0)
 {
   double drift_len = cluster_pos2-0;
-  double sigma_tra = diff_tra*sqrt(drift_len);
-  double sigma_long = diff_long*sqrt(drift_len);
+  double sigma_tra = diff_tra*TMath::Sqrt(drift_len);
+  double sigma_long = diff_long*TMath::Sqrt(drift_len);
 //  double sigma_tra = 0.08; // [cm]
 //  double sigma_long = 0.08; // [cm]
 
