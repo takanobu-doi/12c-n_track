@@ -8,7 +8,7 @@
 
 #include "mktrack.hpp"
 
-int check_cmd(int argc, char *argv[], std::vector<std::string> reaction, unsigned int &event_num, std::string &fname, int &scatter, int &pressure);
+int check_cmd(int argc, char *argv[], std::vector<std::string> reaction, std::vector<std::string> gas_table, unsigned int &event_num, std::string &fname, int &scatter, int &pressure, int &gas);
 void show_progress(int &sum_num, unsigned int event_num, int &status, double &Ex);
 
 int main(int argc, char *argv[]){
@@ -17,10 +17,22 @@ int main(int argc, char *argv[]){
   std::string fname;
   int scatter;
   int pressure;
+  int gas;
 
-  std::vector<std::string> reaction = {"alpha"};
+  std::vector<std::string> reaction = {"12C(n,n)12C",
+				       "12C(n,n)3a (7.65)",
+				       "12C(n,n)3a (7.65)",
+				       "12C(n,n)3a (9.64)",
+				       "12C(n,n)3a (9.64)",
+				       "p(n,n)p"};
+  std::vector<std::string> gas_table = {"CH4",
+					"CH4+H2",
+					"CH4+He",
+					"iso-C4H10",
+					"iso-C4H10+H2",
+					"iso-C4H10+He"};
 
-  if(check_cmd(argc, argv, reaction, event_num, fname, scatter, pressure) == 0){
+  if(check_cmd(argc, argv, reaction, gas_table, event_num, fname, scatter, pressure, gas) == 0){
     return 1;
   }
   
@@ -67,11 +79,11 @@ int main(int argc, char *argv[]){
     }
 
     // generate events by multi threads
-    *itr = std::thread([&mtx, &flush_out, &tot_out, &idealvalue_out, &teachervalue_out, &exist_ideal, &exist_teacher, &sum_num, &status, &Ex, &drift_v](int scatter, int pressure, int tot_num){
+    *itr = std::thread([&mtx, &flush_out, &tot_out, &idealvalue_out, &teachervalue_out, &exist_ideal, &exist_teacher, &sum_num, &status, &Ex, &drift_v](int scatter, int pressure, int gas, int tot_num){
 //	std::string fname_2 = "temp_tot_"+std::to_string(ii++)+".dat";
 //	std::ofstream tot_out_2(datdir+fname_2);
 	mtx.lock();
-	mktrack *MAIKo = new mktrack(scatter, pressure);
+	mktrack *MAIKo = new mktrack(scatter, pressure, gas);
 	drift_v = MAIKo->GetDriftv();
 	mtx.unlock();
 	for(int num=0;num<tot_num;){
@@ -105,7 +117,7 @@ int main(int argc, char *argv[]){
 //	  tot_out_2.close();
 	}
 	delete MAIKo;
-      }, scatter, pressure, tot_num);
+      }, scatter, pressure, gas, tot_num);
   }
 
   while(drift_v<0){
@@ -119,6 +131,7 @@ int main(int argc, char *argv[]){
   param_out << "Reaction              : " << reaction[scatter] << std::endl;
   param_out << "Number of events      : " << event_num << std::endl;
   param_out << "Pressure (hPa)        : " << pressure << std::endl;
+  param_out << "Gas                   : " << gas_table[gas] << std::endl;
   param_out << "Drift velocity (cm/ns): " << drift_v << std::endl;
   param_out.close();
   
@@ -138,7 +151,7 @@ int main(int argc, char *argv[]){
   return 0;
 }
 
-int check_cmd(int argc, char *argv[], std::vector<std::string> reaction, unsigned int &event_num, std::string &fname, int &scatter, int &pressure)
+int check_cmd(int argc, char *argv[], std::vector<std::string> reaction, std::vector<std::string> gas_table, unsigned int &event_num, std::string &fname, int &scatter, int &pressure, int &gas)
 {
   if(argc<2){
     std::cout << "-t, --test: run by default values" << std::endl;
@@ -147,6 +160,7 @@ int check_cmd(int argc, char *argv[], std::vector<std::string> reaction, unsigne
     std::cout << "-p, --pressure: pressure" << std::endl;
     std::cout << "-s, --scatter: select pattern" << std::endl;
     std::cout << "-l, --list: show scattering pattern" << std::endl;
+    std::cout << "-g, --gas: gas" << std::endl;
     return 0;
   }else{
     std::map<std::string, int> list = {{"-t", 1},
@@ -160,14 +174,18 @@ int check_cmd(int argc, char *argv[], std::vector<std::string> reaction, unsigne
 				       {"-s", 5},
 				       {"--scatter", 5},
 				       {"-l", 6},
-				       {"--list", 6}
+				       {"--list", 6},
+				       {"-g", 7},
+				       {"--gas", 7}
     };
     int i = 1;
     event_num = 1;
     fname = "temp";
     scatter = 0;
     pressure = 500;
+    gas = 0;
     int reaction_num=0;
+    int gas_table_num=0;
     while(i<argc){
       std::string opt = argv[i++];
       switch(list[opt]){
@@ -177,7 +195,8 @@ int check_cmd(int argc, char *argv[], std::vector<std::string> reaction, unsigne
 	std::cout << "-f, --file: filename" << std::endl;
 	std::cout << "-p, --pressure: pressure" << std::endl;
 	std::cout << "-s, --scatter: select pattern" << std::endl;
-	std::cout << "-l, --list: show scattering pattern" << std::endl;
+	std::cout << "-l, --list: show list" << std::endl;
+	std::cout << "-g, --gas: gas" << std::endl;
 	return 0;
       case 1:
 	break;
@@ -210,17 +229,30 @@ int check_cmd(int argc, char *argv[], std::vector<std::string> reaction, unsigne
 	}
 	break;
       case 6:
+	std::cout << "<< reaction >>" << std::endl;
 	for(auto itr=reaction.begin();itr!=reaction.end();++itr){
 	  std::cout << reaction_num++ << ": " << *itr << std::endl;
 	}
+	std::cout << "<< gas table >>" << std::endl;
+	for(auto itr=gas_table.begin();itr!=gas_table.end();++itr){
+	  std::cout << gas_table_num++ << ": " << *itr << std::endl;
+	}
 	return 0;
+      case 7:
+	if(argv[i][0] == '-'){
+	  break;
+	}else{
+	  gas = atoi(argv[i++]);
+	}
+	break;
       default:
 	std::cout << "-t, --test: run by default values" << std::endl;
 	std::cout << "-n, --number: number to generate" << std::endl;
 	std::cout << "-f, --file: filename" << std::endl;
 	std::cout << "-p, --pressure: pressure" << std::endl;
 	std::cout << "-s, --scatter: select pattern" << std::endl;
-	std::cout << "-l, --list: show scattering pattern" << std::endl;
+	std::cout << "-l, --list: show list" << std::endl;
+	std::cout << "-g, --gas: gas" << std::endl;
 	return 0;
       }
     }

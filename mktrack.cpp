@@ -22,61 +22,58 @@ using namespace Garfield;
 
 //#define ONE_ELE 1
 
-void mktrack::SetParameters(int Event_id, int Pressure)
+void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
 {
   // general parameters
-  beam_name = "4He";
+  beam_name = "n";
   // define event-id
-  target_name = {"n"
+  target_name = {"12C",
+		 "12C",
+		 "12C",
+		 "12C",
+		 "12C",
+		 "p"
   };
-  particle_name = {{{"n", "4He"}}
+  particle_name = {{{"n", "12C"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
+		   {{"n", "p"}}
   }; // last particle each bracket is not used for tracking, but all particle of the last bracket is used.
-  particle_ex = {{{0, 0}}
+  particle_ex = {{{0, 0}},
+		 {{0, 7.65}, {0, 0}, {0, 0}},
+		 {{0, 7.65}, {0, 0}, {0, 0}},
+		 {{0, 9.64}, {0, 0}, {0, 0}},
+		 {{0, 9.64}, {0, 0}, {0, 0}},
+		 {{0, 0}}
   };
-  particle_flag = {{false, false}
+  particle_flag = {{false, false},
+		   {false, true, true, true},
+		   {false, false, false, false},
+		   {false, true, true, true},
+		   {false, false, false, false},
+		   {false, false}
   };
-  srim_name = "CH4_";
-//  srim_name = "CH4_H2_";
-//  srim_name = "CH4_He_";
   dirname = "table/";
   event_id = Event_id;
   pressure = Pressure;
-//  beam_energy = 4.2; // [MeV]
-  beam_energy = 0.8;
+  beam_energy = 14; // [MeV]
+//  beam_energy = 0.8;
   Ex_min = 0.; // [MeV]
   Ex_max = 20.; // [MeV]
-  BEAM_RADIUS = 0.1;         // mm
+  BEAM_RADIUS = 10;         // mm
   BEAM_X_CENTER = 102.4/2.; // mm
-  BEAM_Y_CENTER = 140.*0.8;  // mm
+  BEAM_Y_CENTER = 140./2.;  // mm
   VTX_X_MEAN = 102.4/2.;    // mm
   VTX_X_SIGMA = 0.1;	    // mm
   VTX_Y_MEAN = 140./2.;	    // mm
   VTX_Y_SIGMA = 0.1;	    // mm
   VTX_Y_START = 140.*1/8.;  // mm
   VTX_Y_STOP = 140.*7/8;    // mm
-  VTX_Z_START = 102.4*1/8.; // mm
-  VTX_Z_STOP = 102.4*9/8;   // mm       
-  // gas parameters
-  if(srim_name == "CH4_"){
-    W_Val = 30.0; // for CH4
-    Mass_Gas = 16.;   // for CH4 
-    Charge_Gas = 10.; // for CH4
-    density = 0.00065819*pressure/1000.; // for CH4
-  }else if(srim_name == "CH4_H2_"){
-    W_Val = 30.0*0.3+13.6*0.7; // for CH4 3 H2 4
-    Mass_Gas = 16.*0.3+2.*0.7;   // for CH4 3 H2 7
-    Charge_Gas = 10.*0.3+2.*0.7; // for CH4 3 H2 7
-    density = 0.000025535*pressure/100.; // for CH4 3 H2 7
-  }else if(srim_name == "CH4_He_"){
-    W_Val = 30.0*0.4+41.3*0.6; // for CH4 4 He 6
-    Mass_Gas = 16.*0.4+4*0.6;   // for CH4 4 He 6
-    Charge_Gas = 10.*0.4+2*0.6; // for CH4 4 He 6
-    density = 0.000036181*pressure/100.; // for CH4 4 He 6
-  }
-  Fano_Factor = 1.0;
-  Cluster_Size = 1; // default is 30
-  Beam_Cluster_Size = 1;
-  Particle_Cluster_Size = 20;
+  VTX_Z_START = 102.4*0/8.; // mm
+  VTX_Z_STOP = 102.4*8/8;   // mm       
+
   // detector parameters
   center[0] = 10.24/2;
   center[1] = 14./2;
@@ -85,13 +82,8 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   half[1] = 14./2;
   half[2] = 14./2;
   y_plate = 14.;
-  v_plate = -1320.; // for CH4 50hPa
-//  v_plate = -1850.; // for CH4 3 H2 7 100hPa
-//  v_plate = -1370.; // for CH4 100hPa
-//  v_plate = -1515.; // for CH4 4 He 6 100hPa
   y_grid = 0.;
   v_grid = -1250.;
-  E_FIELD = (v_grid-v_plate)/(y_plate-y_grid);
   area[0][0] = 0.;
   area[1][0] = 0.;
   area[2][0] = 0.;
@@ -100,11 +92,104 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   area[2][1] = 102.4;
   beam_area[0][0] = 0.;
   beam_area[1][0] = 0.;
-  beam_area[2][1] = 0.;
+  beam_area[2][0] = 0.;
   beam_area[0][1] = 102.4;
   beam_area[1][1] = 140.;
+
+  // gas parameters
+  switch(Gas){
+  case 0: // detection gas is CH4
+    srim_name = "CH4_";
+    W_Val = 30.0; // for CH4
+    Mass_Gas = 16.;   // for CH4 
+    Charge_Gas = 10.; // for CH4
+    density = 0.00065819*pressure/1000.; // for CH4
+    gain = 360.;
+    if(Pressure==50){
+      v_plate = -70+v_grid; // for CH4 50hPa
+    }else if(Pressure==100){
+      v_plate = -120.+v_grid; // for CH4 100hPa
+    }else{
+      exit(0);
+    }
+    break;
+  case 1: // detection gas is CH4(3)+H2(7)
+    srim_name = "CH4_H2_";
+    W_Val = 30.0*0.3+13.6*0.7; // for CH4 3 H2 4
+    Mass_Gas = 16.*0.3+2.*0.7;   // for CH4 3 H2 7
+    Charge_Gas = 10.*0.3+2.*0.7; // for CH4 3 H2 7
+    density = 0.000025535*pressure/100.; // for CH4 3 H2 7
+    gain = 300;
+    if(Pressure==100){
+      v_plate = -600.+v_grid; // for CH4 3 H2 7 100hPa
+    }else{
+      exit(0);
+    }    
+    break;
+  case 2: // detection gas is CH4(4)+He(6)
+    srim_name = "CH4_He_";
+    W_Val = 30.0*0.4+41.3*0.6; // for CH4 4 He 6
+    Mass_Gas = 16.*0.4+4*0.6;   // for CH4 4 He 6
+    Charge_Gas = 10.*0.4+2*0.6; // for CH4 4 He 6
+    density = 0.000036181*pressure/100.; // for CH4 4 He 6
+    gain = 300;
+    if(Pressure==100){
+      v_plate = -265.+v_grid; // for CH4 4 He 6 100hPa
+    }else{
+      exit(0);
+    }
+    break;
+  case 3: // detection gas is iC4H10
+    srim_name = "iC4H10_";
+    W_Val = 26;
+    Mass_Gas = 58;
+    Charge_Gas = 34;
+    density = 0.000035769*pressure/15.;
+    gain = 300;
+    if(Pressure==15){
+      v_plate = -90+v_grid;
+    }else{
+      exit(0);
+    }
+    break;
+  case 4: // detection gas is iC4H10(1)+H2(9)
+    srim_name = "iC4H10_H2_";
+    W_Val = 26*0.1+13.6*0.9;
+    Mass_Gas = 58*0.1+2*0.9;
+    Charge_Gas = 34*0.1+2*0.9;
+    density = 0.00003129*pressure/100.;
+    gain = 300;
+    if(Pressure==100){
+      v_plate = -950+v_grid;
+    }else{
+      exit(0);
+    }
+    break;
+  case 5: // detection gas is iC4H10(1)+He(9)
+    srim_name = "iC4H10_He_";
+    W_Val = 26*0.1+41.3*0.9;
+    Mass_Gas = 58*0.1+4*0.9;
+    Charge_Gas = 34*0.1+2*0.9;
+    density = 0.000038627*pressure/100.;
+    gain = 300;
+    if(Pressure==100){
+      v_plate = -455+v_grid;
+    }else{
+      exit(0);
+    }
+    break;
+  default:
+    exit(0);
+    break;
+  }
+  Fano_Factor = 1.0;
+  Cluster_Size = 1; // default is 30
+  Beam_Cluster_Size = 1;
+  Particle_Cluster_Size = 20;
+  E_FIELD = (v_grid-v_plate)/(y_plate-y_grid);
+
 //  gain = 100.;
-  gain = 300.; // default is 1000.
+//  gain = 300.; // default is 1000.
   ie_step = 1; // default is 100
 
   cmTomm = 10.;
@@ -116,9 +201,9 @@ void mktrack::SetParameters(int Event_id, int Pressure)
   return;
 }
 
-mktrack::mktrack(int Event_id, int Pressure)
+mktrack::mktrack(int Event_id, int Pressure, int Gas)
 {
-  SetParameters(Event_id, Pressure);
+  SetParameters(Event_id, Pressure, Gas);
   Initialize(Event_id, Pressure);
 }
 
@@ -442,13 +527,13 @@ int mktrack::Generate(int &status, double &ex)
 //  vtx[0] = rndm->Gaus(VTX_X_MEAN, VTX_X_SIGMA);
 //  vtx[1] = rndm->Gaus(VTX_Y_MEAN, VTX_Y_SIGMA);
 //  vtx[1] = rndm->Uniform(VTX_Y_START, VTX_Y_STOP);
-//  do{
-//    vtx[0] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
-//    vtx[1] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
-//  }while(TMath::Sqrt(vtx[0]*vtx[0]+vtx[1]*vtx[1])>BEAM_RADIUS);
-  vtx[0] = BEAM_X_CENTER;
-  vtx[1] = BEAM_Y_CENTER;
-  vtx[2] = VTX_Z_STOP;
+  do{
+    vtx[0] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
+    vtx[1] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
+  }while(TMath::Sqrt(vtx[0]*vtx[0]+vtx[1]*vtx[1])>BEAM_RADIUS);
+  vtx[0] += BEAM_X_CENTER;
+  vtx[1] += BEAM_Y_CENTER;
+  vtx[2] = rndm->Uniform(VTX_Z_START, VTX_Z_STOP);
   start_point[0] = vtx[0];
   start_point[1] = vtx[1];
   start_point[2] = 0.;
