@@ -38,13 +38,13 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
   event_id = Event_id;
   pressure = Pressure;
 //  beam_energy = 14; // [MeV]
-//  beam_energy = 0.5; // [MeV]
-  beam_energy = 4.2; // [MeV]
+  beam_energy = 0.5; // [MeV]
+//  beam_energy = 4.2; // [MeV]
   Ex_min = 0.; // [MeV]
   Ex_max = 20.; // [MeV]
   BEAM_RADIUS = 10;         // mm
   BEAM_X_CENTER = 102.4/2.; // mm
-  BEAM_Y_CENTER = 140.*0.9;  // mm
+  BEAM_Y_CENTER = 140.*0.2;  // mm
   VTX_X_MEAN = 102.4/2.;    // mm
   VTX_X_SIGMA = 0.1;	    // mm
   VTX_Y_MEAN = 140./2.;	    // mm
@@ -175,7 +175,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
   cmTomm = 10.;
   mmTocm = 0.1;
   threshold[0] = 0.1; // anode
-  threshold[1] = 0.1;  //cathode
+  threshold[1] = 0.4;  //cathode
 
   buff = 50;
   return;
