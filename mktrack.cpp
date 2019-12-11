@@ -25,46 +25,26 @@ using namespace Garfield;
 void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
 {
   // general parameters
-  beam_name = "n";
+  beam_name = "4He";
   // define event-id
-  target_name = {"12C",
-		 "12C",
-		 "12C",
-		 "12C",
-		 "12C",
-		 "p"
-  };
-  particle_name = {{{"n", "12C"}},
-		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
-		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
-		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
-		   {{"n", "12C"}, {"4He", "8Be"}, {"4He", "4He"}},
-		   {{"n", "p"}}
+  target_name = {"n"};
+  particle_name = {{{"n", "4He"}}
   }; // last particle each bracket is not used for tracking, but all particle of the last bracket is used.
-  particle_ex = {{{0, 0}},
-		 {{0, 7.65}, {0, 0}, {0, 0}},
-		 {{0, 7.65}, {0, 0}, {0, 0}},
-		 {{0, 9.64}, {0, 0}, {0, 0}},
-		 {{0, 9.64}, {0, 0}, {0, 0}},
-		 {{0, 0}}
+  particle_ex = {{{0, 0}}
   };
-  particle_flag = {{false, false},
-		   {false, true, true, true},
-		   {false, false, false, false},
-		   {false, true, true, true},
-		   {false, false, false, false},
-		   {false, false}
+  particle_flag = {{false, false}
   };
   dirname = "table/";
   event_id = Event_id;
   pressure = Pressure;
-  beam_energy = 14; // [MeV]
-//  beam_energy = 0.8;
+//  beam_energy = 14; // [MeV]
+//  beam_energy = 0.5; // [MeV]
+  beam_energy = 4.2; // [MeV]
   Ex_min = 0.; // [MeV]
   Ex_max = 20.; // [MeV]
   BEAM_RADIUS = 10;         // mm
   BEAM_X_CENTER = 102.4/2.; // mm
-  BEAM_Y_CENTER = 140./2.;  // mm
+  BEAM_Y_CENTER = 140.*0.9;  // mm
   VTX_X_MEAN = 102.4/2.;    // mm
   VTX_X_SIGMA = 0.1;	    // mm
   VTX_Y_MEAN = 140./2.;	    // mm
@@ -72,7 +52,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
   VTX_Y_START = 140.*1/8.;  // mm
   VTX_Y_STOP = 140.*7/8;    // mm
   VTX_Z_START = 102.4*0/8.; // mm
-  VTX_Z_STOP = 102.4*8/8;   // mm       
+  VTX_Z_STOP = 102.4*9/8;   // mm       
 
   // detector parameters
   center[0] = 10.24/2;
@@ -524,16 +504,9 @@ int mktrack::Generate(int &status, double &ex)
   status = 1;
   ex = event->Generate();
 
-//  vtx[0] = rndm->Gaus(VTX_X_MEAN, VTX_X_SIGMA);
-//  vtx[1] = rndm->Gaus(VTX_Y_MEAN, VTX_Y_SIGMA);
-//  vtx[1] = rndm->Uniform(VTX_Y_START, VTX_Y_STOP);
-  do{
-    vtx[0] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
-    vtx[1] = rndm->Uniform(-BEAM_RADIUS, BEAM_RADIUS);
-  }while(TMath::Sqrt(vtx[0]*vtx[0]+vtx[1]*vtx[1])>BEAM_RADIUS);
-  vtx[0] += BEAM_X_CENTER;
-  vtx[1] += BEAM_Y_CENTER;
-  vtx[2] = rndm->Uniform(VTX_Z_START, VTX_Z_STOP);
+  vtx[0] = BEAM_X_CENTER;
+  vtx[1] = BEAM_Y_CENTER;
+  vtx[2] = VTX_Z_STOP;
   start_point[0] = vtx[0];
   start_point[1] = vtx[1];
   start_point[2] = 0.;

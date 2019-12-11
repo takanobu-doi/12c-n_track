@@ -19,12 +19,7 @@ int main(int argc, char *argv[]){
   int pressure;
   int gas;
 
-  std::vector<std::string> reaction = {"12C(n,n)12C",
-				       "12C(n,n)3a (7.65)",
-				       "12C(n,n)3a (7.65)",
-				       "12C(n,n)3a (9.64)",
-				       "12C(n,n)3a (9.64)",
-				       "p(n,n)p"};
+  std::vector<std::string> reaction = {"alpha"};
   std::vector<std::string> gas_table = {"CH4",
 					"CH4+H2",
 					"CH4+He",
@@ -226,6 +221,9 @@ int check_cmd(int argc, char *argv[], std::vector<std::string> reaction, std::ve
 	  break;
 	}else{
 	  scatter = atoi(argv[i++]);
+	  if(scatter<0 || scatter>=reaction.size()){
+	    return -1;
+	  }
 	}
 	break;
       case 6:
@@ -243,6 +241,9 @@ int check_cmd(int argc, char *argv[], std::vector<std::string> reaction, std::ve
 	  break;
 	}else{
 	  gas = atoi(argv[i++]);
+	  if(gas<0 || gas>=gas_table.size()){
+	    return -1;
+	  }
 	}
 	break;
       default:
