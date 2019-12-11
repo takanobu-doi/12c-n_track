@@ -195,7 +195,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
   cmTomm = 10.;
   mmTocm = 0.1;
   threshold[0] = 0.1; // anode
-  threshold[1] = 0.1;  //cathode
+  threshold[1] = 0.4;  //cathode
 
   buff = 50;
   return;
