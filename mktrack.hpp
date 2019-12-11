@@ -25,7 +25,7 @@ using namespace Garfield;
 class mktrack
 {
 public:
-  mktrack(int, int);
+  mktrack(int, int, int);
   ~mktrack();
   void Initialize(int, int);
   int SetGasFile();
@@ -33,7 +33,7 @@ public:
   int SetWaveFile();
   int SetRangeFile();
   int SetDriftFile();
-  void SetParameters(int, int);
+  void SetParameters(int, int, int);
 //  std::vector<std::string> GetParticleName();
   int ModTrack();
   double GetFlush(int, int, int);
