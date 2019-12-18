@@ -100,7 +100,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
   switch(Gas){
   case 0: // detection gas is CH4
     srim_name = "CH4_";
-    W_Val = 30.0; // for CH4
+    W_Val = 29.1; // for CH4
     Mass_Gas = 16.;   // for CH4 
     Charge_Gas = 10.; // for CH4
     density = 0.00065819*pressure/1000.; // for CH4
@@ -115,7 +115,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     break;
   case 1: // detection gas is CH4(3)+H2(7)
     srim_name = "CH4_H2_";
-    W_Val = 30.0*0.3+13.6*0.7; // for CH4 3 H2 4
+    W_Val = 29.1*0.3+36.4*0.7; // for CH4 3 H2 4
     Mass_Gas = 16.*0.3+2.*0.7;   // for CH4 3 H2 7
     Charge_Gas = 10.*0.3+2.*0.7; // for CH4 3 H2 7
     density = 0.000025535*pressure/100.; // for CH4 3 H2 7
@@ -128,7 +128,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     break;
   case 2: // detection gas is CH4(4)+He(6)
     srim_name = "CH4_He_";
-    W_Val = 30.0*0.4+41.3*0.6; // for CH4 4 He 6
+    W_Val = 29.1*0.4+46.0*0.6; // for CH4 4 He 6
     Mass_Gas = 16.*0.4+4*0.6;   // for CH4 4 He 6
     Charge_Gas = 10.*0.4+2*0.6; // for CH4 4 He 6
     density = 0.000036181*pressure/100.; // for CH4 4 He 6
@@ -141,7 +141,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     break;
   case 3: // detection gas is iC4H10
     srim_name = "iC4H10_";
-    W_Val = 26;
+    W_Val = 26.;
     Mass_Gas = 58;
     Charge_Gas = 34;
     density = 0.000035769*pressure/15.;
@@ -154,7 +154,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     break;
   case 4: // detection gas is iC4H10(1)+H2(9)
     srim_name = "iC4H10_H2_";
-    W_Val = 26*0.1+13.6*0.9;
+    W_Val = 26*0.1+36.4*0.9;
     Mass_Gas = 58*0.1+2*0.9;
     Charge_Gas = 34*0.1+2*0.9;
     density = 0.00003129*pressure/100.;
@@ -167,7 +167,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     break;
   case 5: // detection gas is iC4H10(1)+He(9)
     srim_name = "iC4H10_He_";
-    W_Val = 26*0.1+41.3*0.9;
+    W_Val = 26*0.1+46.0*0.9;
     Mass_Gas = 58*0.1+4*0.9;
     Charge_Gas = 34*0.1+2*0.9;
     density = 0.000038627*pressure/100.;
