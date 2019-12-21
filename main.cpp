@@ -23,9 +23,12 @@ int main(int argc, char *argv[]){
   std::vector<std::string> gas_table = {"CH4",
 					"CH4+H2",
 					"CH4+He",
-					"iso-C4H10",
-					"iso-C4H10+H2",
-					"iso-C4H10+He"};
+					"iC4H10",
+					"iC4H10(1)+H2(9)",
+					"iC4H10(1)+He(9)",
+					"iC4H10(3)+H2(7)",
+					"iC4H10(4)+H2(6)",
+					"iC4H10(3)+He(7)"};
 
   if(check_cmd(argc, argv, reaction, gas_table, event_num, fname, scatter, pressure, gas) == 0){
     return 1;

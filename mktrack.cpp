@@ -38,8 +38,8 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
   event_id = Event_id;
   pressure = Pressure;
 //  beam_energy = 14; // [MeV]
-  beam_energy = 0.5; // [MeV]
-//  beam_energy = 4.2; // [MeV]
+//  beam_energy = 0.5; // [MeV]
+  beam_energy = 4.2; // [MeV]
   Ex_min = 0.; // [MeV]
   Ex_max = 20.; // [MeV]
   BEAM_RADIUS = 10;         // mm
@@ -99,7 +99,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     Mass_Gas = 16.*0.3+2.*0.7;   // for CH4 3 H2 7
     Charge_Gas = 10.*0.3+2.*0.7; // for CH4 3 H2 7
     density = 0.000025535*pressure/100.; // for CH4 3 H2 7
-    gain = 300;
+    gain = 0;
     if(Pressure==100){
       v_plate = -600.+v_grid; // for CH4 3 H2 7 100hPa
     }else{
@@ -112,7 +112,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     Mass_Gas = 16.*0.4+4*0.6;   // for CH4 4 He 6
     Charge_Gas = 10.*0.4+2*0.6; // for CH4 4 He 6
     density = 0.000036181*pressure/100.; // for CH4 4 He 6
-    gain = 300;
+    gain = 320;
     if(Pressure==100){
       v_plate = -265.+v_grid; // for CH4 4 He 6 100hPa
     }else{
@@ -125,7 +125,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     Mass_Gas = 58;
     Charge_Gas = 34;
     density = 0.000035769*pressure/15.;
-    gain = 300;
+    gain = 0;
     if(Pressure==15){
       v_plate = -90+v_grid;
     }else{
@@ -133,27 +133,66 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     }
     break;
   case 4: // detection gas is iC4H10(1)+H2(9)
-    srim_name = "iC4H10_H2_";
+    srim_name = "iC4H10_1_H2_9_";
     W_Val = 26*0.1+13.6*0.9;
     Mass_Gas = 58*0.1+2*0.9;
     Charge_Gas = 34*0.1+2*0.9;
     density = 0.00003129*pressure/100.;
-    gain = 300;
+    gain = 0;
     if(Pressure==100){
-      v_plate = -950+v_grid;
+      v_plate = -955+v_grid;
     }else{
       exit(0);
     }
     break;
   case 5: // detection gas is iC4H10(1)+He(9)
-    srim_name = "iC4H10_He_";
+    srim_name = "iC4H10_1_He_9_";
     W_Val = 26*0.1+41.3*0.9;
     Mass_Gas = 58*0.1+4*0.9;
     Charge_Gas = 34*0.1+2*0.9;
     density = 0.000038627*pressure/100.;
-    gain = 300;
+    gain = 390;
     if(Pressure==100){
-      v_plate = -455+v_grid;
+      v_plate = -460+v_grid;
+    }else{
+      exit(0);
+    }
+    break;
+  case 6:
+    srim_name = "iC4H10_3_H2_7_";
+    W_Val = 26*0.3+13.6*0.7;
+    Mass_Gas = 58*0.3+2*0.7;
+    Charge_Gas = 34*0.3+2*0.7;
+    density = 0.000038664*Pressure/50;
+    gain = 0;
+    if(Pressure==50){
+      v_plate = -330+v_grid;
+    }else{
+      exit(0);
+    }
+    break;
+  case 7:
+    srim_name = "iC4H10_2_H2_8_";
+    W_Val = 26*0.2+13.6*0.8;
+    Mass_Gas = 58*0.2+2*0.8;
+    Charge_Gas = 34*0.2+2*0.8;
+    density = 0.000027155*Pressure/50;
+    gain = 0;
+    if(Pressure==50){
+      v_plate = -370+v_grid;
+    }else{
+      exit(0);
+    }
+    break;
+  case 8:
+    srim_name = "iC4H10_3_He_7_";
+    W_Val = 26*0.3+41.3*0.7;
+    Mass_Gas = 58*0.3+4*0.7;
+    Charge_Gas = 34*0.3+2*0.7;
+    density = 0.000041517*Pressure/50;
+    gain = 500;
+    if(Pressure==50){
+      v_plate = -210+v_grid;
     }else{
       exit(0);
     }
@@ -175,7 +214,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
   cmTomm = 10.;
   mmTocm = 0.1;
   threshold[0] = 0.1; // anode
-  threshold[1] = 0.4;  //cathode
+  threshold[1] = 0.1;  //cathode
 
   buff = 50;
   return;
