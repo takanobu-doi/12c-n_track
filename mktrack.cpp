@@ -344,10 +344,10 @@ int mktrack::SetSrimFile()
 				    Charge_Gas);
     srim_beam->SetDensity(density);
     srim_beam->SetTargetClusterSize(Cluster_Size);
-//    srim_beam->DisableTransverseStraggling();
-//    srim_beam->DisableLongitudinalStraggling();
-    srim_beam->EnableTransverseStraggling();
-    srim_beam->EnableLongitudinalStraggling();
+    srim_beam->DisableTransverseStraggling();
+    srim_beam->DisableLongitudinalStraggling();
+//    srim_beam->EnableTransverseStraggling();
+//    srim_beam->EnableLongitudinalStraggling();
   }
   
   for(auto it1=(*(particle_name.begin()+event_id)).begin();it1!=(*(particle_name.begin()+event_id)).end();++it1){
