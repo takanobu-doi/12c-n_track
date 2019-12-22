@@ -119,9 +119,9 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     Mass_Gas = 16.*0.3+2.*0.7;   // for CH4 3 H2 7
     Charge_Gas = 10.*0.3+2.*0.7; // for CH4 3 H2 7
     density = 0.000025535*pressure/100.; // for CH4 3 H2 7
-    gain = 300;
+    gain = 355;
     if(Pressure==100){
-      v_plate = -600.+v_grid; // for CH4 3 H2 7 100hPa
+      v_plate = -605.+v_grid; // for CH4 3 H2 7 100hPa
     }else{
       exit(0);
     }    
@@ -132,7 +132,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     Mass_Gas = 16.*0.4+4*0.6;   // for CH4 4 He 6
     Charge_Gas = 10.*0.4+2*0.6; // for CH4 4 He 6
     density = 0.000036181*pressure/100.; // for CH4 4 He 6
-    gain = 300;
+    gain = 320;
     if(Pressure==100){
       v_plate = -265.+v_grid; // for CH4 4 He 6 100hPa
     }else{
@@ -158,9 +158,9 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     Mass_Gas = 58*0.1+2*0.9;
     Charge_Gas = 34*0.1+2*0.9;
     density = 0.00003129*pressure/100.;
-    gain = 300;
+    gain = 270;
     if(Pressure==100){
-      v_plate = -950+v_grid;
+      v_plate = -955+v_grid;
     }else{
       exit(0);
     }
@@ -171,9 +171,9 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     Mass_Gas = 58*0.1+4*0.9;
     Charge_Gas = 34*0.1+2*0.9;
     density = 0.000038627*pressure/100.;
-    gain = 300;
+    gain = 390;
     if(Pressure==100){
-      v_plate = -455+v_grid;
+      v_plate = -460+v_grid;
     }else{
       exit(0);
     }
