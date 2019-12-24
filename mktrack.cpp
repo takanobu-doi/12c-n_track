@@ -106,7 +106,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     density = 0.00065819*pressure/1000.; // for CH4
     gain = 360.;
     if(Pressure==50){
-      v_plate = -70+v_grid; // for CH4 50hPa
+      v_plate = -60+v_grid; // for CH4 50hPa
     }else if(Pressure==100){
       v_plate = -120.+v_grid; // for CH4 100hPa
     }else{
@@ -153,7 +153,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     }
     break;
   case 4: // detection gas is iC4H10(1)+H2(9)
-    srim_name = "iC4H10_H2_";
+    srim_name = "iC4H10_1_H2_9_";
     W_Val = 26*0.1+36.4*0.9;
     Mass_Gas = 58*0.1+2*0.9;
     Charge_Gas = 34*0.1+2*0.9;
@@ -166,7 +166,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     }
     break;
   case 5: // detection gas is iC4H10(1)+He(9)
-    srim_name = "iC4H10_He_";
+    srim_name = "iC4H10_1_He_9_";
     W_Val = 26*0.1+46.0*0.9;
     Mass_Gas = 58*0.1+4*0.9;
     Charge_Gas = 34*0.1+2*0.9;
@@ -195,7 +195,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
   cmTomm = 10.;
   mmTocm = 0.1;
   threshold[0] = 0.1; // anode
-  threshold[1] = 0.4;  //cathode
+  threshold[1] = 0.1;  //cathode
 
   buff = 50;
   return;
@@ -325,10 +325,10 @@ int mktrack::SetSrimFile()
 				    Charge_Gas);
     srim_beam->SetDensity(density);
     srim_beam->SetTargetClusterSize(Cluster_Size);
-//    srim_beam->DisableTransverseStraggling();
-//    srim_beam->DisableLongitudinalStraggling();
-    srim_beam->EnableTransverseStraggling();
-    srim_beam->EnableLongitudinalStraggling();
+    srim_beam->DisableTransverseStraggling();
+    srim_beam->DisableLongitudinalStraggling();
+//    srim_beam->EnableTransverseStraggling();
+//    srim_beam->EnableLongitudinalStraggling();
   }
   
   for(auto it1=(*(particle_name.begin()+event_id)).begin();it1!=(*(particle_name.begin()+event_id)).end();++it1){
@@ -354,10 +354,10 @@ int mktrack::SetSrimFile()
 						       Charge_Gas);
       (*(srim_particle.end()-1))->SetDensity(density);
       (*(srim_particle.end()-1))->SetTargetClusterSize(Cluster_Size);
-//      (*(srim_particle.end()-1))->DisableTransverseStraggling();
-//      (*(srim_particle.end()-1))->DisableLongitudinalStraggling();
-      (*(srim_particle.end()-1))->EnableTransverseStraggling();
-      (*(srim_particle.end()-1))->EnableLongitudinalStraggling();
+      (*(srim_particle.end()-1))->DisableTransverseStraggling();
+      (*(srim_particle.end()-1))->DisableLongitudinalStraggling();
+//      (*(srim_particle.end()-1))->EnableTransverseStraggling();
+//      (*(srim_particle.end()-1))->EnableLongitudinalStraggling();
     }
   }
 
