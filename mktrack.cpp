@@ -38,13 +38,13 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
   event_id = Event_id;
   pressure = Pressure;
 //  beam_energy = 14; // [MeV]
-  beam_energy = 0.5; // [MeV]
-//  beam_energy = 4.2; // [MeV]
+//  beam_energy = 0.5; // [MeV]
+  beam_energy = 4.2; // [MeV]
   Ex_min = 0.; // [MeV]
   Ex_max = 20.; // [MeV]
   BEAM_RADIUS = 10;         // mm
   BEAM_X_CENTER = 102.4/2.; // mm
-  BEAM_Y_CENTER = 140.*0.2;  // mm
+  BEAM_Y_CENTER = 140.*0.8;  // mm
   VTX_X_MEAN = 102.4/2.;    // mm
   VTX_X_SIGMA = 0.1;	    // mm
   VTX_Y_MEAN = 140./2.;	    // mm
@@ -134,7 +134,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     break;
   case 4: // detection gas is iC4H10(1)+H2(9)
     srim_name = "iC4H10_1_H2_9_";
-    W_Val = 26*0.1+13.6*0.9;
+    W_Val = 26*0.1+36.5*0.9;
     Mass_Gas = 58*0.1+2*0.9;
     Charge_Gas = 34*0.1+2*0.9;
     density = 0.00003129*pressure/100.;
@@ -160,7 +160,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     break;
   case 6:
     srim_name = "iC4H10_3_H2_7_";
-    W_Val = 26*0.3+13.6*0.7;
+    W_Val = 26*0.3+36.5*0.7;
     Mass_Gas = 58*0.3+2*0.7;
     Charge_Gas = 34*0.3+2*0.7;
     density = 0.000038664*Pressure/50;
@@ -173,7 +173,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     break;
   case 7:
     srim_name = "iC4H10_2_H2_8_";
-    W_Val = 26*0.2+13.6*0.8;
+    W_Val = 26*0.2+36.5*0.8;
     Mass_Gas = 58*0.2+2*0.8;
     Charge_Gas = 34*0.2+2*0.8;
     density = 0.000027155*Pressure/50;
@@ -201,7 +201,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     exit(0);
     break;
   }
-  Fano_Factor = 1.0;
+  Fano_Factor = 0.2;
   Cluster_Size = 1; // default is 30
   Beam_Cluster_Size = 1;
   Particle_Cluster_Size = 20;
@@ -373,10 +373,10 @@ int mktrack::SetSrimFile()
 						       Charge_Gas);
       (*(srim_particle.end()-1))->SetDensity(density);
       (*(srim_particle.end()-1))->SetTargetClusterSize(Cluster_Size);
-//      (*(srim_particle.end()-1))->DisableTransverseStraggling();
-//      (*(srim_particle.end()-1))->DisableLongitudinalStraggling();
-      (*(srim_particle.end()-1))->EnableTransverseStraggling();
-      (*(srim_particle.end()-1))->EnableLongitudinalStraggling();
+      (*(srim_particle.end()-1))->DisableTransverseStraggling();
+      (*(srim_particle.end()-1))->DisableLongitudinalStraggling();
+//      (*(srim_particle.end()-1))->EnableTransverseStraggling();
+//      (*(srim_particle.end()-1))->EnableLongitudinalStraggling();
     }
   }
 

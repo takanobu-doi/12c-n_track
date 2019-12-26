@@ -80,14 +80,14 @@ gen_eve::gen_eve(std::string BEAM_NAME, std::string TARGET_NAME, std::vector<std
   E_beam = T_beam/1000.+mass_beam; // total energy of incident particle [GeV]
   P_beam = TMath::Sqrt(E_beam*E_beam-mass_beam*mass_beam); // P [GeV/c]
 //  beam = TLorentzVector(0., 0., P_beam, E_beam); // assume z-axis direction
-//  beam = TLorentzVector(0.,
-//			-P_beam*TMath::Sin(30*TMath::DegToRad()),
-//			P_beam*TMath::Cos(30*TMath::DegToRad()),
-//			E_beam);
   beam = TLorentzVector(0.,
-			P_beam*TMath::Sin(30*TMath::DegToRad()),
+			-P_beam*TMath::Sin(30*TMath::DegToRad()),
 			P_beam*TMath::Cos(30*TMath::DegToRad()),
 			E_beam);
+//  beam = TLorentzVector(0.,
+//			P_beam*TMath::Sin(30*TMath::DegToRad()),
+//			P_beam*TMath::Cos(30*TMath::DegToRad()),
+//			E_beam);
   target = TLorentzVector(0., 0., 0., mass_target);
   W = beam+target;
 
