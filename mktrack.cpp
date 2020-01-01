@@ -182,7 +182,7 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
     exit(0);
     break;
   }
-  Fano_Factor = 1.0;
+  Fano_Factor = 0.2;
   Cluster_Size = 1; // default is 30
   Beam_Cluster_Size = 1;
   Particle_Cluster_Size = 20;
