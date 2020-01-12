@@ -58,7 +58,8 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
   dirname = "table/";
   event_id = Event_id;
   pressure = Pressure;
-  beam_energy = 14; // [MeV]
+//  beam_energy = 14; // [MeV]
+  beam_energy = 8.5; // [MeV}
 //  beam_energy = 0.8;
   Ex_min = 0.; // [MeV]
   Ex_max = 20.; // [MeV]
