@@ -600,13 +600,13 @@ int mktrack::Generate(int &status, double &ex)
   // modify triger timing
   int shifted = ModTrack();
 
-//  // modify labeled point "y-shifted"
-//  for(unsigned int i=0;i<point.size();i++){
-//    point[i][0][1] = point[i][0][1]-shifted;
-//    point[i][1][1] = point[i][1][1]-shifted;
-//    point[i][2][1] = point[i][2][1]-shifted;
-//    point[i][3][1] = point[i][3][1]-shifted;
-//  }
+  // modify labeled point "y-shifted"
+  for(unsigned int i=0;i<point.size();i++){
+    point[i][0][1] = point[i][0][1]-shifted;
+    point[i][1][1] = point[i][1][1]-shifted;
+    point[i][2][1] = point[i][2][1]-shifted;
+    point[i][3][1] = point[i][3][1]-shifted;
+  }
 
   return 1;
 }
@@ -742,7 +742,6 @@ int mktrack::ModTrack()
       }
     }
   }
-
   return triger-buff;
 }
 
