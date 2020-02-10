@@ -94,8 +94,6 @@ private:
   double Charge_Gas;
   double density;
   int Cluster_Size;
-  int Beam_Cluster_Size;
-  int Particle_Cluster_Size;
   // detector parameters
   double center[3];
   double half[3];

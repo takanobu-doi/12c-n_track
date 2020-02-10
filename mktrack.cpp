@@ -184,8 +184,6 @@ void mktrack::SetParameters(int Event_id, int Pressure, int Gas)
   }
   Fano_Factor = 0.2;
   Cluster_Size = 1; // default is 30
-  Beam_Cluster_Size = 1;
-  Particle_Cluster_Size = 20;
   E_FIELD = (v_grid-v_plate)/(y_plate-y_grid);
 
 //  gain = 100.;
